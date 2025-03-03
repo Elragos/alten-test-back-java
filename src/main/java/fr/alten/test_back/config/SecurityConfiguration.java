@@ -4,12 +4,13 @@
  */
 package fr.alten.test_back.config;
 
+import fr.alten.test_back.error.CustomAccessDeniedHandler;
+import fr.alten.test_back.error.CustomAuthenticationEntryPoint;
 import fr.alten.test_back.helper.JwtAuthenticationFilter;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
-import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,13 +31,19 @@ public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
+            AuthenticationProvider authenticationProvider,
+            CustomAuthenticationEntryPoint authenticationEntryPoint,
+            CustomAccessDeniedHandler accessDeniedHandler
     ) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -45,12 +52,17 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
             // Configure routes authorization
             .authorizeHttpRequests(auth -> auth
-                // Create account route -> all users
-                .requestMatchers("/account").permitAll()
-                // Login account route -> all users
-                .requestMatchers("/token").permitAll()
-                // Other routes -> only authenticated users
-                .anyRequest().authenticated()
+                // Product -> need authenticated
+                .requestMatchers("/product/*").authenticated()
+                // Other routes -> allow all
+                .anyRequest().permitAll()
+            )
+            // Enable custom error handlinfs
+            .exceptionHandling(exception -> exception
+                // 401 Unauthorized
+                .authenticationEntryPoint(authenticationEntryPoint)
+                // 403 Forbidden
+                .accessDeniedHandler(accessDeniedHandler)
             )
             // Set authentication provider
             .authenticationProvider(authenticationProvider)
@@ -58,7 +70,7 @@ public class SecurityConfiguration {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // Adding JWT filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            
+
         return http.build();
     }
 

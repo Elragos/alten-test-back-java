@@ -50,6 +50,10 @@ public class Product {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public Product(){
+        
+    }
+    
     /**
      * Create new product from DTO.
      *
