@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.ProductDto;
@@ -10,7 +6,6 @@ import fr.alten.test_back.error.ResourceNotFoundException;
 import fr.alten.test_back.repository.ProductRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Controller handling product interactions.
@@ -31,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductController {
 
     /**
-     * Product repository.
+     * Used product repository.
      */
     @Autowired
     private ProductRepository productRepository;
@@ -45,15 +39,16 @@ public class ProductController {
     public Iterable<Product> listProducts() {
         return this.productRepository.findAll();
     }
-    
+
     /**
      * Get product info.
+     *
      * @param id Product DB ID.
      * @return Product info, or 404 error if not found.
      */
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable Integer id) {
-         // Match product with DB
+        // Match product with DB
         Optional<Product> product = this.productRepository.findById(id);
         // If not found
         if (product.isEmpty()) {
@@ -88,7 +83,8 @@ public class ProductController {
      * @return Updated product.
      */
     @PatchMapping("/{id}")
-    public Product updateProduct(@PathVariable Integer id, @RequestBody ProductDto newProductData) {
+    public Product updateProduct(@PathVariable Integer id,
+            @RequestBody ProductDto newProductData) {
         Optional<Product> update = this.productRepository.findById(id);
         if (update.isEmpty()) {
             throw new ResourceNotFoundException("Unable to find product");

@@ -13,8 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Custom access denied handler.
  *
- * @author User
+ * @author Amarechal
  */
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
@@ -23,14 +24,18 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException)
             throws IOException, ServletException {
 
+        // Set content type to JSON
         response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+        // Set 403 error
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
+        // Set error message
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("error", "Access Denied");
         errorDetails.put("message", "You are not allowed to access this resource.");
         errorDetails.put("path", request.getRequestURI());
 
+        // Write response
         ObjectMapper mapper = new ObjectMapper();
         response.getWriter().write(mapper.writeValueAsString(errorDetails));
     }

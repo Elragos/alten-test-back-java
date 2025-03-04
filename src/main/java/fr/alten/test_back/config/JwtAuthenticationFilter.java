@@ -1,4 +1,4 @@
-package fr.alten.test_back.helper;
+package fr.alten.test_back.config;
 
 import fr.alten.test_back.service.JwtService;
 import io.micrometer.common.lang.NonNull;

@@ -31,7 +31,14 @@ public class LoginController {
      */
     private final AuthenticationService authenticationService;
 
-    public LoginController(JwtService jwtService, AuthenticationService authenticationService) {
+    /**
+     * Initialize controller.
+     *
+     * @param jwtService Used JWT service.
+     * @param authenticationService Used authentication service.
+     */
+    public LoginController(JwtService jwtService,
+            AuthenticationService authenticationService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
     }
@@ -43,7 +50,8 @@ public class LoginController {
      * @return API response.
      */
     @PostMapping("/account")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<RegisterResponse> register(
+            @RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
 
         RegisterResponse response = new RegisterResponse()
@@ -61,7 +69,8 @@ public class LoginController {
      * @return API response.
      */
     @PostMapping("/token")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(
+            @RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);

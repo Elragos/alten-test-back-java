@@ -1,6 +1,5 @@
 package fr.alten.test_back.error;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 /**
  * Enable 401 errors in API.
- * 
+ *
  * @author AMarechal
  */
 @Component
@@ -25,14 +24,18 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
 
+        // Set content type to JSON
         response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        // Set 401 error
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
+        // Set error message
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("error", "Access denied");
         errorDetails.put("message", authException.getMessage());
         errorDetails.put("path", request.getRequestURI());
 
+        // Write response
         ObjectMapper mapper = new ObjectMapper();
         response.getWriter().write(mapper.writeValueAsString(errorDetails));
     }

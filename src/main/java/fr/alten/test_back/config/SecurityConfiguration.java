@@ -1,12 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fr.alten.test_back.config;
 
 import fr.alten.test_back.error.CustomAccessDeniedHandler;
 import fr.alten.test_back.error.CustomAuthenticationEntryPoint;
-import fr.alten.test_back.helper.JwtAuthenticationFilter;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,11 +24,33 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    /**
+     * Used authentication provider.
+     */
     private final AuthenticationProvider authenticationProvider;
+    /**
+     * Used JWT authentication filter.
+     */
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    /**
+     * Used custom authentication entry point (for 401 errors).
+     */
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    /**
+     * Used custom access denied handler (for 403 errors).
+     */
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
+    /**
+     * Initialize configuration.
+     *
+     * @param jwtAuthenticationFilter Used JWT authentication filter.
+     * @param authenticationProvider Used authentication provider.
+     * @param authenticationEntryPoint Used custom authentication entry point
+     * (for 401 errors).
+     * @param accessDeniedHandler Used custom access denied handler (for 403
+     * errors).
+     */
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             AuthenticationProvider authenticationProvider,
@@ -46,6 +63,13 @@ public class SecurityConfiguration {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
+    /**
+     * Define security rules.
+     *
+     * @param http Used security.
+     * @return Generated security filter chain.
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Disable CSRF because JWT is used
@@ -68,14 +92,19 @@ public class SecurityConfiguration {
             .authenticationProvider(authenticationProvider)
             // Configure stateless session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Adding JWT filter
+            // Add JWT filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    /**
+     * Define CORS configuration source
+     *
+     * @return CORS configuration source.
+     */
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));

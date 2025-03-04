@@ -8,23 +8,41 @@ import java.util.Optional;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
+ * Application authentication service.
  *
- * @author User
+ * @author Amarechal
  */
 @Service
 public class AuthenticationService {
 
+    /**
+     * Used user repository.
+     */
     private final UserRepository userRepository;
 
+    /**
+     * Used password encoder.
+     */
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Used authentication manager.
+     */
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Initialize service.
+     *
+     * @param userRepository Used user repository.
+     * @param authenticationManager Used authentication manager.
+     * @param passwordEncoder Used password encoder.
+     */
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
@@ -35,7 +53,14 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User signup(RegisterUserDto input) {
+    /**
+     * Create new user.
+     *
+     * @param input User registration info.
+     * @return Created user.
+     * @throws ResponseStatusException If user email already used.
+     */
+    public User signup(RegisterUserDto input) throws ResponseStatusException {
         // Test if user email already exists in DB
         Optional<User> exisiting = this.userRepository.findByEmail(input.getEmail());
         // If found
@@ -55,7 +80,16 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
-    public User authenticate(LoginUserDto input) {
+    /**
+     * Authenticate user.
+     *
+     * @param input User authentication info.
+     * @return Found user.
+     * @throws AuthenticationException If authentication failed.
+     * @throws ResponseStatusException If user not found.
+     */
+    public User authenticate(LoginUserDto input)
+            throws AuthenticationException, ResponseStatusException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
@@ -65,6 +99,6 @@ public class AuthenticationService {
 
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(400),
-                    "Invalid Email or password"));
+                "Invalid Email or password"));
     }
 }

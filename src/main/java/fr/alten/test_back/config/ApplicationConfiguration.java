@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fr.alten.test_back.config;
 
 import fr.alten.test_back.repository.UserRepository;
@@ -16,20 +12,30 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
+ * Application global configuration.
  *
- * @author User
+ * @author Amarechal
  */
 @Configuration
 public class ApplicationConfiguration {
 
+    /**
+     * Used user repository.
+     */
     private final UserRepository userRepository;
 
+    /**
+     * Initialize configuration.
+     *
+     * @param userRepository Used user repository.
+     */
     public ApplicationConfiguration(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     /**
      * Define user service.
+     *
      * @return User service.
      */
     @Bean
@@ -40,6 +46,7 @@ public class ApplicationConfiguration {
 
     /**
      * Define password encoder.
+     *
      * @return Password encoder.
      */
     @Bean
@@ -47,6 +54,13 @@ public class ApplicationConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Define authentication manager.
+     *
+     * @param config Used authentication configuration.
+     * @return Used autentication manager.
+     * @throws Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -54,6 +68,7 @@ public class ApplicationConfiguration {
 
     /**
      * Define authentication provider.
+     *
      * @return Authentication provider.
      */
     @Bean
