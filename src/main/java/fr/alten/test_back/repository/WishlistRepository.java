@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * Product repository.
+ * Wishlist repository.
  *
  * @author Amarechal
  */

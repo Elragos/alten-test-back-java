@@ -3,9 +3,9 @@ package fr.alten.test_back.service;
 import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
 import fr.alten.test_back.entity.User;
+import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.repository.UserRepository;
 import java.util.Optional;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -66,8 +66,7 @@ public class AuthenticationService {
         // If found
         if (exisiting.isPresent()) {
             // Throw error
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400),
-                    "User already registered with this email");
+            throw new InvalidPayloadException("User already registered with this email");
         }
 
         // Else create user
@@ -98,7 +97,6 @@ public class AuthenticationService {
         );
 
         return userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(400),
-                "Invalid Email or password"));
+                .orElseThrow(() -> new InvalidPayloadException("Invalid Email or password"));
     }
 }

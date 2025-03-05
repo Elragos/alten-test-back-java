@@ -52,13 +52,14 @@ public class LoginController {
     @PostMapping("/account")
     public ResponseEntity<RegisterResponse> register(
             @RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
-
+        // Create user
+        User registeredUser = this.authenticationService.signup(registerUserDto);
+        // Generate response
         RegisterResponse response = new RegisterResponse()
                 .setEmail(registeredUser.getEmail())
                 .setUsername(registeredUser.getUsername())
                 .setFirstname(registeredUser.getFirstname());
-
+        // Send response
         return ResponseEntity.ok(response);
     }
 
@@ -71,14 +72,18 @@ public class LoginController {
     @PostMapping("/token")
     public ResponseEntity<LoginResponse> authenticate(
             @RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+        // Authenticate user
+        User authenticatedUser = this.authenticationService.authenticate(loginUserDto);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        // Generate JWT token
+        String jwtToken = this.jwtService.generateToken(authenticatedUser);
 
+        // Generate response
         LoginResponse loginResponse = new LoginResponse()
                 .setToken(jwtToken)
-                .setExpiresIn(jwtService.getExpirationTime());
+                .setExpiresIn(this.jwtService.getExpirationTime());
 
+        // Send response
         return ResponseEntity.ok(loginResponse);
     }
 

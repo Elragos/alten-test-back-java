@@ -80,23 +80,26 @@ public class SecurityConfiguration {
                 .requestMatchers("/product", "/product/[0-9]+").authenticated()
                 // Wishlist -> need authenticated
                 .requestMatchers("/wishlist", "/wishlist/[0-9]+").authenticated()
+                // Cart -> need authenticated
+                .requestMatchers("/cart", "/cart/[0-9]+").authenticated()
                 // Other routes -> allow all
                 .anyRequest().permitAll()
             )
             // Enable custom error handlinfs
             .exceptionHandling(exception -> exception
                 // 401 Unauthorized
-                .authenticationEntryPoint(authenticationEntryPoint)
+                .authenticationEntryPoint(this.authenticationEntryPoint)
                 // 403 Forbidden
-                .accessDeniedHandler(accessDeniedHandler)
+                .accessDeniedHandler(this.accessDeniedHandler)
             )
             // Set authentication provider
-            .authenticationProvider(authenticationProvider)
+            .authenticationProvider(this.authenticationProvider)
             // Configure stateless session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // Add JWT filter
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        // Build security rules
         return http.build();
     }
 

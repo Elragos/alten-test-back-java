@@ -3,7 +3,7 @@ package fr.alten.test_back.controller;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.entity.Wishlist;
-import fr.alten.test_back.error.ResourceNotFoundException;
+import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.UserRepository;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.WishlistRepository;
@@ -87,7 +87,7 @@ public class WishlistController {
             this.userRepository.save(owner);
         }
         // Find adding product
-        Product toAdd = this.findProduct(id);
+        Product toAdd = ProductHelper.findProduct(id, this.productRepository);
         // Add product to wishlist
         wishlist.addProduct(toAdd);
         // Save wishlist to DB
@@ -112,7 +112,7 @@ public class WishlistController {
             return List.of();
         }
         // Find product to remove
-        Product toRemove = this.findProduct(id);
+        Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         // Remove product from wishlist
         wishlist.removeProduct(toRemove);
         // Save wishlist to DB
@@ -145,23 +145,5 @@ public class WishlistController {
         Optional<User> user = this.userRepository.findByEmail(userEmail);
         // Get user wishlist
         return user.get();
-    }
-
-    /**
-     * Find product by DB id.
-     *
-     * @param id Product DB ID.
-     * @return Found product.
-     * @throws ResourceNotFoundException If no product found.
-     */
-    private Product findProduct(Integer id) throws ResourceNotFoundException {
-        Optional<Product> product = this.productRepository.findById(id);
-        // If not found
-        if (product.isEmpty()) {
-            //Throw 404 error
-            throw new ResourceNotFoundException("Unable to find product");
-        }
-
-        return product.get();
     }
 }

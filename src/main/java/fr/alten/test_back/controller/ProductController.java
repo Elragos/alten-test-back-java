@@ -2,9 +2,8 @@ package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
-import fr.alten.test_back.error.ResourceNotFoundException;
+import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.ProductRepository;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +48,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable Integer id) {
         // Return product info.
-        return this.findProduct(id);
+        return ProductHelper.findProduct(id, this.productRepository);
     }
 
     /**
@@ -79,7 +78,7 @@ public class ProductController {
     public Product updateProduct(@PathVariable Integer id,
             @RequestBody ProductDto newProductData) {
         // Get product to update
-        Product update = this.findProduct(id);
+        Product update = ProductHelper.findProduct(id, this.productRepository);
         // Update product info from DTO
         update.updateFromDto(newProductData);
         // Save updated product to DB
@@ -97,28 +96,10 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public Product removeProduct(@PathVariable Integer id) {
         // Get product to remove
-        Product toRemove = this.findProduct(id);
+        Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         // Remove product from DB
         this.productRepository.delete(toRemove);
         // Return deleted product info.
         return toRemove;
-    }
-
-    /**
-     * Find product by DB id.
-     *
-     * @param id Product DB ID.
-     * @return Found product.
-     * @throws ResourceNotFoundException If no product found.
-     */
-    private Product findProduct(Integer id) throws ResourceNotFoundException {
-        Optional<Product> product = this.productRepository.findById(id);
-        // If not found
-        if (product.isEmpty()) {
-            //Throw 404 error
-            throw new ResourceNotFoundException("Unable to find product");
-        }
-
-        return product.get();
     }
 }
