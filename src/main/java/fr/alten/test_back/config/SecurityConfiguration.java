@@ -77,7 +77,9 @@ public class SecurityConfiguration {
             // Configure routes authorization
             .authorizeHttpRequests(auth -> auth
                 // Product -> need authenticated
-                .requestMatchers("/product/*").authenticated()
+                .requestMatchers("/product", "/product/[0-9]+").authenticated()
+                // Wishlist -> need authenticated
+                .requestMatchers("/wishlist", "/wishlist/[0-9]+").authenticated()
                 // Other routes -> allow all
                 .anyRequest().permitAll()
             )

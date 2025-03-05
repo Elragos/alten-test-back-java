@@ -1,16 +1,20 @@
 package fr.alten.test_back.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -53,6 +57,11 @@ public class User implements UserDetails {
      */
     @Column(nullable = false)
     private String password;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "wishlist_id", referencedColumnName = "id")
+    @RestResource(path = "wishlist", rel = "owner")
+    private Wishlist wishlist;
 
     /**
      * User creation date.
@@ -182,6 +191,26 @@ public class User implements UserDetails {
      */
     public User setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    /**
+     * Get user wishlist.
+     *
+     * @return User wishlist.
+     */
+    public Wishlist getWishlist() {
+        return wishlist;
+    }
+
+    /**
+     * Set user wishlist.
+     *
+     * @param wishlist New user wishlist.
+     * @return self
+     */
+    public User setWishlist(Wishlist wishlist) {
+        this.wishlist = wishlist;
         return this;
     }
 

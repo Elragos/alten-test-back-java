@@ -48,16 +48,8 @@ public class ProductController {
      */
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable Integer id) {
-        // Match product with DB
-        Optional<Product> product = this.productRepository.findById(id);
-        // If not found
-        if (product.isEmpty()) {
-            //Throw 404 error
-            throw new ResourceNotFoundException("Unable to find product");
-        }
-
         // Return product info.
-        return product.get();
+        return this.findProduct(id);
     }
 
     /**
@@ -68,10 +60,11 @@ public class ProductController {
      */
     @PostMapping
     public Product addProduct(@RequestBody ProductDto newProductData) {
+        // Create new product from DTO
         Product createdProduct = new Product(newProductData);
-
+        // Save created product to DB
         createdProduct = this.productRepository.save(createdProduct);
-
+        // Return created product
         return createdProduct;
     }
 
@@ -85,16 +78,14 @@ public class ProductController {
     @PatchMapping("/{id}")
     public Product updateProduct(@PathVariable Integer id,
             @RequestBody ProductDto newProductData) {
-        Optional<Product> update = this.productRepository.findById(id);
-        if (update.isEmpty()) {
-            throw new ResourceNotFoundException("Unable to find product");
-        }
-
-        update.get().updateFromDto(newProductData);
-
-        this.productRepository.save(update.get());
-
-        return update.get();
+        // Get product to update
+        Product update = this.findProduct(id);
+        // Update product info from DTO
+        update.updateFromDto(newProductData);
+        // Save updated product to DB
+        this.productRepository.save(update);
+        // Return updated product
+        return update;
     }
 
     /**
@@ -105,17 +96,29 @@ public class ProductController {
      */
     @DeleteMapping("/{id}")
     public Product removeProduct(@PathVariable Integer id) {
-        // Match product with DB
-        Optional<Product> update = this.productRepository.findById(id);
+        // Get product to remove
+        Product toRemove = this.findProduct(id);
+        // Remove product from DB
+        this.productRepository.delete(toRemove);
+        // Return deleted product info.
+        return toRemove;
+    }
+
+    /**
+     * Find product by DB id.
+     *
+     * @param id Product DB ID.
+     * @return Found product.
+     * @throws ResourceNotFoundException If no product found.
+     */
+    private Product findProduct(Integer id) throws ResourceNotFoundException {
+        Optional<Product> product = this.productRepository.findById(id);
         // If not found
-        if (update.isEmpty()) {
+        if (product.isEmpty()) {
             //Throw 404 error
             throw new ResourceNotFoundException("Unable to find product");
         }
-        // Remove product from DB
-        this.productRepository.delete(update.get());
 
-        // Return deleted product info.
-        return update.get();
+        return product.get();
     }
 }
