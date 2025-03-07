@@ -3,6 +3,7 @@ package fr.alten.test_back.controller;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.entity.Wishlist;
+import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.UserRepository;
 import fr.alten.test_back.repository.ProductRepository;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author AMarechal
  */
 @RestController
-@RequestMapping("/wishlist")
+@RequestMapping(AppRoutes.WISHLIST)
 public class WishlistController {
 
     /**

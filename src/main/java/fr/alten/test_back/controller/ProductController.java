@@ -2,6 +2,7 @@ package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
+import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Amarechal
  */
 @RestController
-@RequestMapping("/product")
+@RequestMapping(AppRoutes.PRODUCT)
 public class ProductController {
 
     /**

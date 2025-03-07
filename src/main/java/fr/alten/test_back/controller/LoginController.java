@@ -3,6 +3,7 @@ package fr.alten.test_back.controller;
 import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
 import fr.alten.test_back.entity.User;
+import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.response.LoginResponse;
 import fr.alten.test_back.response.RegisterResponse;
 import fr.alten.test_back.service.AuthenticationService;
@@ -49,7 +50,7 @@ public class LoginController {
      * @param registerUserDto User info.
      * @return API response.
      */
-    @PostMapping("/account")
+    @PostMapping(AppRoutes.CREATE_ACCOUNT)
     public ResponseEntity<RegisterResponse> register(
             @RequestBody RegisterUserDto registerUserDto) {
         // Create user
@@ -69,7 +70,7 @@ public class LoginController {
      * @param loginUserDto User login info.
      * @return API response.
      */
-    @PostMapping("/token")
+    @PostMapping(AppRoutes.LOGIN)
     public ResponseEntity<LoginResponse> authenticate(
             @RequestBody LoginUserDto loginUserDto) {
         // Authenticate user
@@ -86,5 +87,4 @@ public class LoginController {
         // Send response
         return ResponseEntity.ok(loginResponse);
     }
-
 }

@@ -2,10 +2,10 @@ package fr.alten.test_back.controller;
 
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.error.InvalidPayloadException;
+import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Cart;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.ProductRepository;
-import fr.alten.test_back.service.JwtService;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author AMarechal
  */
 @RestController
-@RequestMapping("/cart")
+@RequestMapping(AppRoutes.CART)
 public class CartController {
-
-    /**
-     * Used JWT service.
-     */
-    @Autowired
-    private JwtService jwtService;
 
     /**
      * Used product repository.

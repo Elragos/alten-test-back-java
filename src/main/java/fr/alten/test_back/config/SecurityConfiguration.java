@@ -2,6 +2,8 @@ package fr.alten.test_back.config;
 
 import fr.alten.test_back.error.CustomAccessDeniedHandler;
 import fr.alten.test_back.error.CustomAuthenticationEntryPoint;
+import fr.alten.test_back.helper.AppRoutes;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,14 +78,13 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
             // Configure routes authorization
             .authorizeHttpRequests(auth -> auth
-                // Product -> need authenticated
-                .requestMatchers("/product", "/product/[0-9]+").authenticated()
-                // Wishlist -> need authenticated
-                .requestMatchers("/wishlist", "/wishlist/[0-9]+").authenticated()
-                // Cart -> need authenticated
-                .requestMatchers("/cart", "/cart/[0-9]+").authenticated()
-                // Other routes -> allow all
-                .anyRequest().permitAll()
+                // Account creation & authentication -> allow all
+                .requestMatchers(
+                    AppRoutes.CREATE_ACCOUNT,
+                    AppRoutes.LOGIN
+                ).permitAll()
+                // Other routes -> need authentication
+                .anyRequest().authenticated()
             )
             // Enable custom error handlinfs
             .exceptionHandling(exception -> exception
@@ -96,6 +97,24 @@ public class SecurityConfiguration {
             .authenticationProvider(this.authenticationProvider)
             // Configure stateless session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Set logout page
+            .logout(logout-> 
+                // Define logout URL
+                logout.logoutUrl(AppRoutes.LOGOUT)
+                // Clear authentication context
+                .clearAuthentication(true)
+                // Invalidate session
+                .invalidateHttpSession(true)
+                // Remove session cookie
+                .deleteCookies("JSESSIONID")
+                // Disable logout redirection 
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    // Just send HTTP 200
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
+                // Allow all to access logout page
+                .permitAll()
+            )
             // Add JWT filter
             .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
