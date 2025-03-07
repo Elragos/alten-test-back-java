@@ -31,8 +31,14 @@ public final class AppRoutes {
      * Authentication route.
      */
     public static final String LOGIN = "/token";
+    
     /**
      * Log out route.
      */
     public static final String LOGOUT = "/logout";
+    
+    /**
+     * 
+     */
+    public static final String USER_INFO = "/me";
 }

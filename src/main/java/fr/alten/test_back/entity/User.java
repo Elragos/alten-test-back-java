@@ -1,12 +1,16 @@
 package fr.alten.test_back.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
@@ -56,12 +60,20 @@ public class User implements UserDetails {
      * User encoded password.
      */
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "wishlist_id", referencedColumnName = "id")
     @RestResource(path = "wishlist", rel = "owner")
     private Wishlist wishlist;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_authority_join_table",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
+    )
+    private List<Authority> authorities;
 
     /**
      * User creation date.
@@ -254,14 +266,20 @@ public class User implements UserDetails {
         return this;
     }
 
-    /**
-     * Get user rights, not implemented yet.
-     *
-     * @return User rights.
-     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return this.authorities;
+    }
+
+    /**
+     * Set user authorities.
+     *
+     * @param authorities New user authorities.
+     * @return self
+     */
+    public User setAuthorities(List<Authority> authorities) {
+        this.authorities = authorities;
+        return this;
     }
 
     /**

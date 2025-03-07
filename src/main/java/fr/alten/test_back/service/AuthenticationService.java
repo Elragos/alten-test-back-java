@@ -2,9 +2,13 @@ package fr.alten.test_back.service;
 
 import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
+import fr.alten.test_back.entity.Authority;
+import fr.alten.test_back.entity.AuthorityEnum;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.error.InvalidPayloadException;
+import fr.alten.test_back.repository.AuthorityRepository;
 import fr.alten.test_back.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,20 +41,28 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     /**
+     * Used authority repository.
+     */
+    private final AuthorityRepository authorityRepository;
+
+    /**
      * Initialize service.
      *
      * @param userRepository Used user repository.
      * @param authenticationManager Used authentication manager.
      * @param passwordEncoder Used password encoder.
+     * @param authorityRepository Used authority repository.
      */
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AuthorityRepository authorityRepository
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authorityRepository = authorityRepository;
     }
 
     /**
@@ -74,7 +86,9 @@ public class AuthenticationService {
                 .setUsername(input.getUsername())
                 .setFirstname(input.getFirstname())
                 .setEmail(input.getEmail())
-                .setPassword(passwordEncoder.encode(input.getPassword()));
+                .setPassword(passwordEncoder.encode(input.getPassword()))
+                // Set user authority by default
+                .setAuthorities(List.of(getUserRole()));
 
         return userRepository.save(user);
     }
@@ -98,5 +112,9 @@ public class AuthenticationService {
 
         return userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new InvalidPayloadException("Invalid Email or password"));
+    }
+
+    private Authority getUserRole() {
+        return this.authorityRepository.findByAuthority(AuthorityEnum.ROLE_USER.name()).get();
     }
 }

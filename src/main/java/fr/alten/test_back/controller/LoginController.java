@@ -9,6 +9,9 @@ import fr.alten.test_back.response.RegisterResponse;
 import fr.alten.test_back.service.AuthenticationService;
 import fr.alten.test_back.service.JwtService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,5 +89,15 @@ public class LoginController {
 
         // Send response
         return ResponseEntity.ok(loginResponse);
+    }
+
+    /**
+     * Get user information.
+     *
+     * @return User Information.
+     */
+    @GetMapping(AppRoutes.USER_INFO)
+    public ResponseEntity<Authentication> getAuthenticatedUserInfo() {
+        return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication());
     }
 }

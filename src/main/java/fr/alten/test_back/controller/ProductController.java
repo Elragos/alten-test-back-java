@@ -3,6 +3,7 @@ package fr.alten.test_back.controller;
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.helper.AppRoutes;
+import fr.alten.test_back.helper.ControllerHelper;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +54,15 @@ public class ProductController {
     }
 
     /**
-     * Add product to DB.
+     * Add product to DB, only for admin users.
      *
      * @param newProductData Product Info.
      * @return Created product.
      */
     @PostMapping
     public Product addProduct(@RequestBody ProductDto newProductData) {
+        // Check if user admin before proceed
+        ControllerHelper.checkAdminAuthenticated();
         // Create new product from DTO
         Product createdProduct = new Product(newProductData);
         // Save created product to DB
@@ -69,7 +72,7 @@ public class ProductController {
     }
 
     /**
-     * Update product to DB.
+     * Update product to DB, only for admin users.
      *
      * @param id Product DB ID to update.
      * @param newProductData Product updated Info.
@@ -78,6 +81,8 @@ public class ProductController {
     @PatchMapping("/{id}")
     public Product updateProduct(@PathVariable Integer id,
             @RequestBody ProductDto newProductData) {
+        // Check if user admin before proceed
+        ControllerHelper.checkAdminAuthenticated();
         // Get product to update
         Product update = ProductHelper.findProduct(id, this.productRepository);
         // Update product info from DTO
@@ -89,18 +94,21 @@ public class ProductController {
     }
 
     /**
-     * Remove product to DB.
+     * Remove product to DB, only for admin users.
      *
      * @param id Product DB ID to update.
      * @return Deleted product.
      */
     @DeleteMapping("/{id}")
     public Product removeProduct(@PathVariable Integer id) {
-        // Get product to remove
+        // Check if user admin before proceed
+        ControllerHelper.checkAdminAuthenticated();
+        // Find product in DB
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         // Remove product from DB
         this.productRepository.delete(toRemove);
         // Return deleted product info.
         return toRemove;
     }
+
 }
