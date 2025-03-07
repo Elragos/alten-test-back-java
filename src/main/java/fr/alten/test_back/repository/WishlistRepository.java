@@ -11,5 +11,5 @@ import org.springframework.data.repository.CrudRepository;
  * @author Amarechal
  */
 public interface WishlistRepository extends CrudRepository<Wishlist, Integer> {
-    Optional<Wishlist> findByOwner(User user);
+    
 }

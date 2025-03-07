@@ -1,12 +1,11 @@
 package fr.alten.test_back.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +25,9 @@ public class Wishlist {
     private Integer id;
 
     /**
-     * Wishlist owner.
-     */
-    @OneToOne(mappedBy = "wishlist")
-    private User owner;
-
-    /**
      * Wishlist products.
      */
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Product> products;
 
     /**
@@ -56,27 +49,7 @@ public class Wishlist {
         this.id = id;
         return this;
     }
-
-    /**
-     * Get wishlist owner.
-     *
-     * @return Wishlist owner.
-     */
-    public User getOwner() {
-        return this.owner;
-    }
-
-    /**
-     * Set wishlist owner.
-     *
-     * @param owner New wishlist owner.
-     * @return self
-     */
-    public Wishlist setOwner(User owner) {
-        this.owner = owner;
-        return this;
-    }
-
+    
     /**
      * Get wishlist products.
      *

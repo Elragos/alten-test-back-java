@@ -79,7 +79,7 @@ public class WishlistController {
             // Get owner
             User owner = this.getCurrentUser();
             // Create wishlist
-            wishlist = new Wishlist().setOwner(owner);
+            wishlist = new Wishlist();
             // Save wishlist to DB
             wishlist = this.wishlistRepository.save(wishlist);
             // Register wishlist with user

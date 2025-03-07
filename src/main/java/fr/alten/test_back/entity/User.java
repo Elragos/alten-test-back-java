@@ -65,7 +65,6 @@ public class User implements UserDetails {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "wishlist_id", referencedColumnName = "id")
-    @RestResource(path = "wishlist", rel = "owner")
     private Wishlist wishlist;
 
     @ManyToMany(fetch = FetchType.EAGER)
