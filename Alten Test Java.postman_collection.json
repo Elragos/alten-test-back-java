@@ -1,0 +1,537 @@
+{
+    "info": {
+        "_postman_id": "a8bd68be-439c-4f77-8541-172fcadc1ee7",
+        "name": "Alten Test Java",
+        "description": "Ici se trouvent tous les test pour l'API du projet de test technique demandée par Alten.\n\n2 Variables d'environnements sont exploitées pour faciliter la création de nouvelles requêtes :\n\n- baseURL : l'URL de base pour se connecter à l'API\n    \n- apiToken : le token JWT utilisé pour s'authentifier sur le site\n    \n\nPour configurer le token JWT exploité par l'API, il suffit de s'authentifier via l'une des 2 méthodes de la partie User, et de récupérer le token renvoyé par l'API pour le stocker dans la variable d'environnement apiToken",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "42532342"
+    },
+    "item": [
+        {
+            "name": "Product",
+            "item": [
+                {
+                    "name": "Get all products",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/product",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "product"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"code\": \"Test 123\",\r\n    \"name\": \"Test\",\r\n    \"description\": \"Test\",\r\n    \"image\": \"Test\",\r\n    \"category\": \"Test\",\r\n    \"price\": 10.2,\r\n    \"quantity\": 10,\r\n    \"internalReference\": \"Test\",\r\n    \"shellId\": 10,\r\n    \"inventoryStatus\": \"INSTOCK\",\r\n    \"rating\": 4.5\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/product",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "product"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get product 1",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/product/1",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "product",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update product 1",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"code\": \"Test 789\",\r\n    \"name\": \"Test 123485\",\r\n    \"description\": \"Test\",\r\n    \"image\": \"Test\",\r\n    \"category\": \"Test\",\r\n    \"price\": 10.2,\r\n    \"quantity\": 10,\r\n    \"internalReference\": \"Test\",\r\n    \"shellId\": 10,\r\n    \"inventoryStatus\": \"INSTOCK\",\r\n    \"rating\": 4.5\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/product/15",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "product",
+                                "15"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete product 1",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/product/1",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "product",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Ici sont regroupés tous les tests concernant la partie produit de l'API",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "Admin Authentication",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"email\": \"admin@admin.com\",\r\n    \"password\": \"123456\"\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/token",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "token"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User Creation",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"username\": \"Test 2\",\r\n    \"firstname\": \"test\",\r\n    \"email\": \"test2@test.com\",\r\n    \"password\": \"123456\"\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/account",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "account"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User authentication",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"email\": \"test@test.com\",\r\n    \"password\": \"123456\"\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/token",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "token"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"email\": \"test@test.com\",\r\n    \"password\": \"123456\"\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/logout",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "logout"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User info",
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    },
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"email\": \"test@test.com\",\r\n    \"password\": \"123456\"\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/me",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "me"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Ici sont regroupés tous les tests concernant la partie utilisateur de l'API",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Wishlist",
+            "item": [
+                {
+                    "name": "List wishlist product for current user",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/wishlist",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "wishlist"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add product to current user's wishlist",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/wishlist/3",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "wishlist",
+                                "3"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove product to current user's wishlist",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/wishlist/4",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "wishlist",
+                                "4"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Ici sont regroupés tous les tests concernant la partie wishlist de l'API",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Cart",
+            "item": [
+                {
+                    "name": "List cart items",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/cart",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "cart"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add item to cart",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\r\n    \"quantity\" : -50\r\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseURL}}/cart/1",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove item from cart",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseURL}}/cart/1",
+                            "host": [
+                                "{{baseURL}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Ici sont regroupés tous les tests concernant la partie panier de l'API",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "packages": {},
+                        "exec": [
+                            ""
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{apiToken}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseURL",
+            "value": "",
+            "type": "default"
+        }
+    ]
+}

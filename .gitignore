@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Project config files
+application.yml
+compose.yaml
