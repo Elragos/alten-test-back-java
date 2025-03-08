@@ -40,8 +40,8 @@ public class CartController {
      * @return Cart item list.
      */
     @GetMapping
-    public Iterable<Cart.CartItem> getCart(HttpSession session) {
-        return Cart.getSessionCart(session).getItems();
+    public Cart getCart(HttpSession session) {
+        return Cart.getSessionCart(session);
     }
 
     /**
@@ -53,7 +53,7 @@ public class CartController {
      * @return Updated cart item list.
      */
     @PostMapping("/{id}")
-    public Iterable<Cart.CartItem> addProduct(
+    public Cart addProduct(
             HttpSession session,
             @RequestBody Map<String, String> payload,
             @PathVariable int id
@@ -69,11 +69,11 @@ public class CartController {
         Product toAdd = ProductHelper.findProduct(id, this.productRepository);
         cart.addItem(quantity, toAdd);
         cart.saveInSession(session);
-        return cart.getItems();
+        return cart;
     }
 
     @DeleteMapping("/{id}")
-    public Iterable<Cart.CartItem> removeProduct(
+    public Cart removeProduct(
             HttpSession session,
             @PathVariable int id
     ) {
@@ -81,6 +81,6 @@ public class CartController {
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         cart.removeItem(toRemove);
         cart.saveInSession(session);
-        return cart.getItems();
+        return cart;
     }
 }
