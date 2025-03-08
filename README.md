@@ -27,11 +27,6 @@ le à jour selon votre configuration JWT souhaitée :
 ```
 cp application_example.yml application.yml
 ```
-Dupliquer le fichier application_example.yml dans application.yml et mettez 
-le à jour selon votre configuration JWT souhaitée :
-```
-cp application_example.yml application.yml
-```
 Dupliquer le fichier compose_example.yaml dans compose.yaml et mettez 
 le à jour selon votre configuration BDD souhaitée :
 ```
