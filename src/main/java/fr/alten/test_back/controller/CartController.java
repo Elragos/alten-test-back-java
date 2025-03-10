@@ -5,6 +5,7 @@ import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Cart;
 import fr.alten.test_back.helper.ProductHelper;
+import fr.alten.test_back.helper.Translator;
 import fr.alten.test_back.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
@@ -62,7 +63,9 @@ public class CartController {
         try {
             quantity = Integer.valueOf(payload.get("quantity"));
         } catch (NumberFormatException | NullPointerException ex) {
-            throw new InvalidPayloadException("Invalid quantity sent");
+            throw new InvalidPayloadException(
+                Translator.translate("error.cart.invalidQuantity", null)
+            );
         }
 
         Cart cart = Cart.getSessionCart(session);

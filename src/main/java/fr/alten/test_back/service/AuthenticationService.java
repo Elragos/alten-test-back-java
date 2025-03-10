@@ -6,6 +6,7 @@ import fr.alten.test_back.entity.Authority;
 import fr.alten.test_back.entity.AuthorityEnum;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.error.InvalidPayloadException;
+import fr.alten.test_back.helper.Translator;
 import fr.alten.test_back.repository.AuthorityRepository;
 import fr.alten.test_back.repository.UserRepository;
 import java.util.List;
@@ -78,7 +79,10 @@ public class AuthenticationService {
         // If found
         if (exisiting.isPresent()) {
             // Throw error
-            throw new InvalidPayloadException("User already registered with this email");
+            throw new InvalidPayloadException(Translator.translate(
+                    "error.auth.emailAlreadyExists",
+                    new Object[]{input.getEmail()}
+            ));
         }
 
         // Else create user
@@ -99,7 +103,7 @@ public class AuthenticationService {
      * @param input User authentication info.
      * @return Found user.
      * @throws AuthenticationException If authentication failed.
-     * @throws ResponseStatusException If user not found.
+     * @throws InvalidPayloadException If user not found.
      */
     public User authenticate(LoginUserDto input)
             throws AuthenticationException, ResponseStatusException {
@@ -111,10 +115,19 @@ public class AuthenticationService {
         );
 
         return userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new InvalidPayloadException("Invalid Email or password"));
+            .orElseThrow(() -> new InvalidPayloadException(Translator.translate(
+                "error.auth.failed", null
+            )));
     }
 
+    /**
+     * Get application user role.
+     *
+     * @return User role.
+     */
     private Authority getUserRole() {
-        return this.authorityRepository.findByAuthority(AuthorityEnum.ROLE_USER.name()).get();
+        return this.authorityRepository.findByAuthority(
+            AuthorityEnum.ROLE_USER
+        ).get();
     }
 }

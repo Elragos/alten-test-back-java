@@ -22,7 +22,10 @@ public class ProductHelper {
     public static Product findProduct(Integer productId, ProductRepository repo)
             throws ResourceNotFoundException {
         return repo.findById(productId).orElseThrow(()->
-            new ResourceNotFoundException("Unable to find product")
+            new ResourceNotFoundException(Translator.translate(
+                "error.product.notFound", 
+                new Object[]{productId}
+            ))
         );
     }
 }

@@ -132,9 +132,17 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
+        // Define authorized HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // Define authorized headers
+        configuration.setAllowedHeaders(List.of(
+            // Bearer token
+            "Authorization", 
+            // Locale to use
+            "Accept-Language",
+            // Content type (to communicate in JSON
+            "Content-Type"
+        ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

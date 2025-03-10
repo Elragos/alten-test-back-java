@@ -1,6 +1,7 @@
 package fr.alten.test_back.error;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.alten.test_back.helper.Translator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,8 +32,14 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         // Set error message
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("error", "Access Denied");
-        errorDetails.put("message", "You are not allowed to access this resource.");
+        errorDetails.put("error", Translator.translate(
+            "error.auth.accessDenied.title",
+            null
+        ));
+        errorDetails.put("message", Translator.translate(
+            "error.auth.accessDenied.message",
+            null
+        ));
         errorDetails.put("path", request.getRequestURI());
 
         // Write response

@@ -75,20 +75,22 @@ public class Cart {
             // Remove item from cart
             this.removeItem(product);
             // Indicate that product was remove because of invalid quantity
-            this.errors.add(
-                "Product %s was removed since quantity was equals to or below 0"
-                .formatted(product.getName())
-            );
+            this.errors.add(Translator.translate(
+                "error.cart.productRemoved",
+                new Object[]{product.getName()}
+            ));
         }
         // If desired quantity above available quantity
         if (item.quantity > product.getQuantity()) {
             // Limit to available quantity
             item.quantity = product.getQuantity();
             // Indicate that product quantity was limited because of stock
-            this.errors.add(
-                "Product %s was limited to %d items because of stock limitation"
-                .formatted(product.getName(), product.getQuantity())
-            );
+            this.errors.add(Translator.translate(
+                "error.cart.notEnoughStock",
+                new Object[]{
+                    product.getName(), product.getQuantity()
+                }
+            ));
         }
     }
 
