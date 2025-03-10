@@ -2,6 +2,7 @@
 
 Ceci est la version JAVA du test technique back pour mon entrée chez [Alten](https://www.alten.fr/).
 Elle utilise un système d'authentification via JWT.
+L'API utilise également un système de traduction, pour l'heure seuls l'anglais et le français fonctionnent.
 
 L'API exploite les technologies suivantes pour fonctionner :
 
