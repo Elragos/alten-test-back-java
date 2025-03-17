@@ -54,12 +54,12 @@ public class Product {
     /**
      * Product price.
      */
-    private float price;
+    private Float price;
 
     /**
      * Product quantity.
      */
-    private int quantity;
+    private Integer quantity;
 
     /**
      * Product internal reference.
@@ -69,7 +69,7 @@ public class Product {
     /**
      * Product shell Id.
      */
-    private int shellId;
+    private Integer shellId;
 
     /**
      * Product inventory status.
@@ -79,7 +79,7 @@ public class Product {
     /**
      * Product rating.
      */
-    private float rating;
+    private Float rating;
 
     /**
      * Product creation date.
@@ -255,7 +255,7 @@ public class Product {
      * @param price New product price.
      * @return self.
      */
-    public Product setPrice(float price) {
+    public Product setPrice(Float price) {
         this.price = price;
         return this;
     }
@@ -265,7 +265,7 @@ public class Product {
      *
      * @return Product quantity.
      */
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
@@ -275,7 +275,7 @@ public class Product {
      * @param quantity New product quantity.
      * @return self.
      */
-    public Product setQuantity(int quantity) {
+    public Product setQuantity(Integer quantity) {
         this.quantity = quantity;
         return this;
     }
@@ -305,7 +305,7 @@ public class Product {
      *
      * @return Product shell ID.
      */
-    public int getShellId() {
+    public Integer getShellId() {
         return shellId;
     }
 
@@ -315,7 +315,7 @@ public class Product {
      * @param shellId New product shell ID.
      * @return self.
      */
-    public Product setShellId(int shellId) {
+    public Product setShellId(Integer shellId) {
         this.shellId = shellId;
         return this;
     }
@@ -345,7 +345,7 @@ public class Product {
      *
      * @return Product rating.
      */
-    public float getRating() {
+    public Float getRating() {
         return rating;
     }
 
@@ -355,7 +355,7 @@ public class Product {
      * @param rating New product rating.
      * @return self.
      */
-    public Product setRating(float rating) {
+    public Product setRating(Float rating) {
         this.rating = rating;
         return this;
     }
