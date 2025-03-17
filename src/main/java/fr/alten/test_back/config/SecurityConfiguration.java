@@ -83,6 +83,7 @@ public class SecurityConfiguration {
                     AppRoutes.CREATE_ACCOUNT,
                     AppRoutes.LOGIN
                 ).permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
                 // Genereated errors -> allow all
                 .requestMatchers("/error").permitAll()
                 // Other routes -> need authentication
