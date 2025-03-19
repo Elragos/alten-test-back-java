@@ -25,6 +25,11 @@ public class RegisterUserDto {
     private String password;
 
     /**
+     * User authority
+     */
+    private String authority;
+
+    /**
      * Get user name.
      *
      * @return User name.
@@ -101,6 +106,26 @@ public class RegisterUserDto {
      */
     public RegisterUserDto setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    /**
+     * Get user authority.
+     *
+     * @return User authority.
+     */
+    public String getAuthority() {
+        return authority;
+    }
+
+    /**
+     * Set user authority.
+     *
+     * @param authority New user authority.
+     * @return self
+     */
+    public RegisterUserDto setAuthority(String authority) {
+        this.authority = authority;
         return this;
     }
 

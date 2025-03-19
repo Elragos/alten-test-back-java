@@ -12,17 +12,17 @@ import org.springframework.core.io.support.PropertySourceFactory;
  * Initial data factory, used to parse json file
  * @author Amarechal
  */
-public class InitialDataFactory implements PropertySourceFactory {
+public class JsonPropertySourceFactory implements PropertySourceFactory {
 
     @Override
     public PropertySource<?> createPropertySource(
             String name,
             EncodedResource resource
     ) throws IOException {
-        Map readValue = new ObjectMapper()
+        Map<String, Object> readValue = new ObjectMapper()
                 .readValue(resource.getInputStream(), Map.class);
 
-        return new MapPropertySource("json-property", readValue);
+        return new MapPropertySource("initialData.json", readValue);
     }
     
 }
