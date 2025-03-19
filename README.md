@@ -41,9 +41,9 @@ Lancer gradlew pour démarrer l'application
 gradlew --configure-on-demand -x check bootRun
 ```
 
-La BDD MySQL devrait s'initialiser toute seul au premier lancement :
+La BDD MySQL devrait s'initialiser toute seul au premier lancement avec :
 * Les rôles USER et ADMIN dans authority
-* L'utilisateur admin@admin.com avec comme mdp 123456
+* Les utilisateurs et produits définis dans la ressource [initialData.json](https://github.com/Elragos/alten-test-back-java/blob/main/src/main/resources/initialData.json)
 
 ## Exploiter l'API
 
