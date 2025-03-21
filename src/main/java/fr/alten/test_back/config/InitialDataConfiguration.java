@@ -3,20 +3,18 @@ package fr.alten.test_back.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.alten.test_back.dto.CreateUserDTO;
 import fr.alten.test_back.dto.ProductDto;
-import fr.alten.test_back.dto.RegisterUserDto;
 import fr.alten.test_back.entity.Authority;
 import fr.alten.test_back.entity.AuthorityEnum;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
-import fr.alten.test_back.helper.ProductInventoryStatus;
 import fr.alten.test_back.repository.AuthorityRepository;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -66,6 +64,8 @@ public class InitialDataConfiguration {
 
     /**
      * Generate initial data after application contruction.
+     *
+     * @throws com.fasterxml.jackson.core.JsonProcessingException
      */
     @PostConstruct
     public void postConstruct() throws JsonProcessingException {
@@ -102,14 +102,14 @@ public class InitialDataConfiguration {
      */
     private void loadInitialData() throws JsonProcessingException {
         // User list read from JSON file
-        List<RegisterUserDto> users = new ArrayList();
+        List<CreateUserDTO> users = new ArrayList();
 
         // Product list read from JSON file
         List<ProductDto> products = new ArrayList();
-        
+
         // Create object mapper to load JSON data
         ObjectMapper mapper = new ObjectMapper();
-        
+
         // Load user list as object
         Object usersObj = this.env.getProperty("users", Object.class);
         // If it is a list
@@ -118,12 +118,12 @@ public class InitialDataConfiguration {
             String usersJson = mapper.writeValueAsString(usersObj);
             // Read user list from file
             users = mapper.readValue(usersJson,
-                    new TypeReference<List<RegisterUserDto>>() {
+                new TypeReference<List<CreateUserDTO>>() {
             });
         }
 
         // For all users in initial data
-        for (RegisterUserDto userData : users) {
+        for (CreateUserDTO userData : users) {
             // Extract data from JSON
             User toAdd = new User()
                 .setEmail(userData.getEmail())
@@ -131,15 +131,17 @@ public class InitialDataConfiguration {
                 .setUsername(userData.getUsername())
                 .setPassword(this.passwordEncoder.encode(
                     userData.getPassword()
-                ))                        
-                .setAuthorities(List.of(this.authorityRepository.findByAuthority(
-                    AuthorityEnum.valueOf(userData.getAuthority())
-                ).get()));
-            
+                ))
+                .setAuthorities(List.of(
+                    this.authorityRepository.findByAuthority(
+                        AuthorityEnum.valueOf(userData.getAuthority())
+                    ).get()
+                ));
+
             // Create user in DB if not exists
             this.createAccount(toAdd);
         }
-        
+
         Object productsObj = this.env.getProperty("products", Object.class);
         // If it is a list
         if (productsObj instanceof List) {
@@ -147,66 +149,18 @@ public class InitialDataConfiguration {
             String productsJson = mapper.writeValueAsString(productsObj);
             // Read user list from file
             products = mapper.readValue(productsJson,
-                    new TypeReference<List<ProductDto>>() {
+                new TypeReference<List<ProductDto>>() {
             });
         }
 
         // For all users in initial data
         for (ProductDto productData : products) {
             // Extract data from JSON
-             Product toAdd = new Product(productData);
-            
-            // Create product in DB if not exists
-            this.createProduct(toAdd);
-        }
-    }
+            Product toAdd = new Product(productData);
 
-    /**
-     * Load initial data from JSON file
-     */
-    private void loadInitialDataNoDto() {
-        //this.initialData.getUsers();
-        /*
-        // For all users in initial data
-        for (Map userData : this.initialData.getUsers()) {
-            // Extract data from JSON
-            User toAdd = new User()
-                .setEmail(userData.get("email").toString())
-                .setFirstname(userData.get("firstname").toString())
-                .setUsername(userData.get("email").toString())
-                .setPassword(this.passwordEncoder.encode(
-                    userData.get("password").toString()
-                ))                        
-                .setAuthorities(List.of(this.authorityRepository.findByAuthority(
-                    AuthorityEnum.valueOf(userData.get("authority").toString())
-                ).get()));
-            
-            // Create user in DB if not exists
-            this.createAccount(toAdd);
-        }
-    
-        // For all products in initial data
-        for (Map productData : this.initialData.getProducts()) {
-            // Extract data from JSON
-            Product toAdd = new Product()
-                .setCode(productData.get("code").toString())
-                .setName(productData.get("name").toString())
-                .setDescription(productData.get("description").toString())
-                .setImage(productData.get("image").toString())
-                .setCategory(productData.get("category").toString())
-                .setPrice(Float.valueOf(productData.get("price").toString()))
-                .setQuantity(Integer.valueOf(productData.get("quantity").toString()))
-                .setInternalReference(productData.get("quantity").toString())
-                .setShellId(Integer.valueOf(productData.get("shellId").toString()))
-                .setInventoryStatus(ProductInventoryStatus.valueOf(
-                    productData.get("inventoryStatus").toString()
-                ))
-                .setRating(Float.valueOf(productData.get("rating").toString()));
-            
             // Create product in DB if not exists
             this.createProduct(toAdd);
         }
-         */
     }
 
     /**
@@ -216,7 +170,7 @@ public class InitialDataConfiguration {
      */
     private void createAccount(User toCreate) {
         Optional<User> existingAccount = this.userRepository
-                .findByEmail(toCreate.getEmail());
+            .findByEmail(toCreate.getEmail());
         if (existingAccount.isEmpty()) {
             this.userRepository.save(toCreate);
         }
@@ -227,13 +181,13 @@ public class InitialDataConfiguration {
      */
     private void createAdminAccount() {
         User admin = new User()
-                .setEmail("admin@admin.com")
-                .setUsername("admin")
-                .setFirstname("admin")
-                .setPassword(this.passwordEncoder.encode("123456"))
-                .setAuthorities(List.of(this.authorityRepository
-                        .findByAuthority(AuthorityEnum.ROLE_ADMIN).get()
-                ));
+            .setEmail("admin@admin.com")
+            .setUsername("admin")
+            .setFirstname("admin")
+            .setPassword(this.passwordEncoder.encode("123456"))
+            .setAuthorities(List.of(this.authorityRepository
+                .findByAuthority(AuthorityEnum.ROLE_ADMIN).get()
+            ));
         this.createAccount(admin);
     }
 
