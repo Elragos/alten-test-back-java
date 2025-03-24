@@ -5,14 +5,14 @@
             "username": "admin",
             "firstname":"admin",
             "password": "123456",
-            "authority": "ROLE_ADMIN"
+            "role": "ROLE_ADMIN"
         },
         {
             "email": "test@test.com",
             "username": "Test",
             "firstname":"test",
             "password": "123456",
-            "authority": "ROLE_USER"
+            "role": "ROLE_USER"
         }
     ],
     "products": [

@@ -3,10 +3,10 @@ package fr.alten.test_back.controller;
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.helper.AppRoutes;
-import fr.alten.test_back.helper.ControllerHelper;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -59,10 +59,11 @@ public class ProductController {
      * @param newProductData Product Info.
      * @return Created product.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Product addProduct(@RequestBody ProductDto newProductData) {
         // Check if user admin before proceed
-        ControllerHelper.checkAdminAuthenticated();
+        //.checkAdminAuthenticated();
         // Create new product from DTO
         Product createdProduct = new Product(newProductData);
         // Save created product to DB
@@ -78,11 +79,12 @@ public class ProductController {
      * @param newProductData Product updated Info.
      * @return Updated product.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public Product updateProduct(@PathVariable Integer id,
             @RequestBody ProductDto newProductData) {
         // Check if user admin before proceed
-        ControllerHelper.checkAdminAuthenticated();
+        // ControllerHelper.checkAdminAuthenticated();
         // Get product to update
         Product update = ProductHelper.findProduct(id, this.productRepository);
         // Update product info from DTO
@@ -99,10 +101,11 @@ public class ProductController {
      * @param id Product DB ID to update.
      * @return Deleted product.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public Product removeProduct(@PathVariable Integer id) {
         // Check if user admin before proceed
-        ControllerHelper.checkAdminAuthenticated();
+        //ControllerHelper.checkAdminAuthenticated();
         // Find product in DB
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         // Remove product from DB

@@ -8,27 +8,27 @@ package fr.alten.test_back.dto;
 public class CreateUserDTO extends RegisterUserDto {
 
     /**
-     * User authority
+     * User role
      */
-    private String authority;
+    private String role;
     
        /**
-     * Get user authority.
+     * Get user role.
      *
-     * @return User authority.
+     * @return User role.
      */
-    public String getAuthority() {
-        return authority;
+    public String getRole() {
+        return role;
     }
 
     /**
-     * Set user authority.
+     * Set user role.
      *
-     * @param authority New user authority.
+     * @param role New user role.
      * @return self
      */
-    public CreateUserDTO setAuthority(String authority) {
-        this.authority = authority;
+    public CreateUserDTO setRole(String role) {
+        this.role = role;
         return this;
     }
 }

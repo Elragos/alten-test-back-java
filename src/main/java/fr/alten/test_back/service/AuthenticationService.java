@@ -2,12 +2,11 @@ package fr.alten.test_back.service;
 
 import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
-import fr.alten.test_back.entity.Authority;
-import fr.alten.test_back.entity.AuthorityEnum;
+import fr.alten.test_back.entity.Role;
+import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.Translator;
-import fr.alten.test_back.repository.AuthorityRepository;
 import fr.alten.test_back.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import fr.alten.test_back.repository.RoleRepository;
 
 /**
  * Application authentication service.
@@ -42,9 +42,9 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     /**
-     * Used authority repository.
+     * Used role repository.
      */
-    private final AuthorityRepository authorityRepository;
+    private final RoleRepository roleRepository;
 
     /**
      * Initialize service.
@@ -52,18 +52,18 @@ public class AuthenticationService {
      * @param userRepository Used user repository.
      * @param authenticationManager Used authentication manager.
      * @param passwordEncoder Used password encoder.
-     * @param authorityRepository Used authority repository.
+     * @param roleRepository Used role repository.
      */
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            AuthorityRepository authorityRepository
+            RoleRepository roleRepository
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authorityRepository = authorityRepository;
+        this.roleRepository = roleRepository;
     }
 
     /**
@@ -90,11 +90,11 @@ public class AuthenticationService {
                 .setUsername(input.getUsername())
                 .setFirstname(input.getFirstname())
                 .setEmail(input.getEmail())
-                .setPassword(passwordEncoder.encode(input.getPassword()))
-                // Set user authority by default
-                .setAuthorities(List.of(getUserRole()));
+                .setPassword(this.passwordEncoder.encode(input.getPassword()))
+                // Set user role by default
+                .setRoles(List.of(getUserRole()));
 
-        return userRepository.save(user);
+        return this.userRepository.save(user);
     }
 
     /**
@@ -107,7 +107,7 @@ public class AuthenticationService {
      */
     public User authenticate(LoginUserDto input)
             throws AuthenticationException, ResponseStatusException {
-        authenticationManager.authenticate(
+        this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
@@ -125,9 +125,7 @@ public class AuthenticationService {
      *
      * @return User role.
      */
-    private Authority getUserRole() {
-        return this.authorityRepository.findByAuthority(
-            AuthorityEnum.ROLE_USER
-        ).get();
+    private Role getUserRole() {
+        return this.roleRepository.findByRole(RoleEnum.ROLE_USER).get();
     }
 }

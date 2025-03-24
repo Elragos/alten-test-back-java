@@ -16,10 +16,11 @@ import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -68,11 +69,11 @@ public class User implements UserDetails {
     private Wishlist wishlist;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority_join_table",
+    @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "authority_id")
+            inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<Authority> authorities;
+    private List<Role> roles;
 
     /**
      * User creation date.
@@ -267,17 +268,28 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
+        return this.roles.stream()
+            .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
+            .collect(Collectors.toList());
     }
-
+    
     /**
-     * Set user authorities.
+     * Get user roles.
+     * 
+     * @return User roles
+     */
+    public List<Role> getRoles(){
+        return this.roles;
+    }
+    
+    /**
+     * Set user roles.
      *
-     * @param authorities New user authorities.
+     * @param roles New user role.
      * @return self
      */
-    public User setAuthorities(List<Authority> authorities) {
-        this.authorities = authorities;
+    public User setRoles(List<Role> roles) {
+        this.roles = roles;
         return this;
     }
 

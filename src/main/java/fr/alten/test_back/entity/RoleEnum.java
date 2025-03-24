@@ -5,7 +5,7 @@ package fr.alten.test_back.entity;
  *
  * @author Amarechal
  */
-public enum AuthorityEnum {
+public enum RoleEnum {
     /**
      * Simple user.
      */

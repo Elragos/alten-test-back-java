@@ -22,7 +22,12 @@ public class JsonPropertySourceFactory implements PropertySourceFactory {
         Map<String, Object> readValue = new ObjectMapper()
                 .readValue(resource.getInputStream(), Map.class);
 
-        return new MapPropertySource("initialData.json", readValue);
+        String filename = resource.getResource().getFilename();
+        if (filename == null){
+            filename = "json-property";
+        }
+        
+        return new MapPropertySource(filename, readValue);
     }
     
 }

@@ -5,11 +5,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.dto.CreateUserDTO;
 import fr.alten.test_back.dto.ProductDto;
-import fr.alten.test_back.entity.Authority;
-import fr.alten.test_back.entity.AuthorityEnum;
+import fr.alten.test_back.entity.Role;
+import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
-import fr.alten.test_back.repository.AuthorityRepository;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -21,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import fr.alten.test_back.repository.RoleRepository;
 
 /**
  * Initial data configuration. This ensures that all authorities are registered
@@ -45,10 +45,10 @@ public class InitialDataConfiguration {
     private UserRepository userRepository;
 
     /**
-     * Used authority repository.
+     * Used role repository.
      */
     @Autowired
-    private AuthorityRepository authorityRepository;
+    private RoleRepository roleRepository;
 
     /**
      * Used password encoder.
@@ -65,15 +65,15 @@ public class InitialDataConfiguration {
     /**
      * Generate initial data after application contruction.
      *
-     * @throws com.fasterxml.jackson.core.JsonProcessingException
+     * @throws JsonProcessingException When JSON is malformed.
      */
     @PostConstruct
     public void postConstruct() throws JsonProcessingException {
 
-        // For all authorities available
-        for (AuthorityEnum authority : AuthorityEnum.values()) {
+        // For all roles available
+        for (RoleEnum role : RoleEnum.values()) {
             // Create in DB
-            this.generateAuthority(authority);
+            this.generateRole(role);
         }
         // Load initial data
         loadInitialData();
@@ -83,22 +83,24 @@ public class InitialDataConfiguration {
     }
 
     /**
-     * Create authority in DB if not exists.
+     * Create role in DB if not exists.
      *
-     * @param authority Desired authority.
+     * @param role Desired role.
      */
-    private void generateAuthority(AuthorityEnum authority) {
-        Optional<Authority> data = this.authorityRepository
-                .findByAuthority(authority);
+    private void generateRole(RoleEnum role) {
+        Optional<Role> data = this.roleRepository
+            .findByRole(role);
 
         if (data.isEmpty()) {
-            Authority toCreate = new Authority().setAuthority(authority);
-            this.authorityRepository.save(toCreate);
+            Role toCreate = new Role().setRole(role);
+            this.roleRepository.save(toCreate);
         }
     }
 
     /**
      * Load initial data from JSON file
+     * 
+     * @throws JsonProcessingException When JSON is malformed.
      */
     private void loadInitialData() throws JsonProcessingException {
         // User list read from JSON file
@@ -130,12 +132,11 @@ public class InitialDataConfiguration {
                 .setFirstname(userData.getFirstname())
                 .setUsername(userData.getUsername())
                 .setPassword(this.passwordEncoder.encode(
-                    userData.getPassword()
+                        userData.getPassword()
                 ))
-                .setAuthorities(List.of(
-                    this.authorityRepository.findByAuthority(
-                        AuthorityEnum.valueOf(userData.getAuthority())
-                    ).get()
+                .setRoles(List.of(this.roleRepository
+                    .findByRole(RoleEnum.valueOf(userData.getRole()))
+                    .get()
                 ));
 
             // Create user in DB if not exists
@@ -185,8 +186,8 @@ public class InitialDataConfiguration {
             .setUsername("admin")
             .setFirstname("admin")
             .setPassword(this.passwordEncoder.encode("123456"))
-            .setAuthorities(List.of(this.authorityRepository
-                .findByAuthority(AuthorityEnum.ROLE_ADMIN).get()
+            .setRoles(List.of(this.roleRepository
+                .findByRole(RoleEnum.ROLE_ADMIN).get()
             ));
         this.createAccount(admin);
     }
@@ -198,9 +199,11 @@ public class InitialDataConfiguration {
      */
     private void createProduct(Product toCreate) {
         Optional<Product> existingProduct = this.productRepository
-                .findByCode(toCreate.getCode());
+            .findByCode(toCreate.getCode());
+        
         if (existingProduct.isEmpty()) {
             this.productRepository.save(toCreate);
         }
     }
+
 }

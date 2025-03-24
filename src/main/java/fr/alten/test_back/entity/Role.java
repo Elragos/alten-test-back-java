@@ -7,29 +7,28 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import org.springframework.security.core.GrantedAuthority;
 
 /**
- * Entity representing a user authority, defining what role the user has.
+ * Entity representing a user role, defining role the user is allowed to.
  *
  * @author Amarechal
  */
 @Entity
-public class Authority implements GrantedAuthority {
+public class Role {
 
     /**
-     * Authority DB ID.
+     * Role DB ID.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     /**
-     * Authority value.
+     * Role value.
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AuthorityEnum authority;
+    private RoleEnum role;
 
     /**
      * @return the id
@@ -44,24 +43,28 @@ public class Authority implements GrantedAuthority {
      * @param id New DB ID.
      * @return self
      */
-    public Authority setId(Long id) {
+    public Role setId(Long id) {
         this.id = id;
         return this;
     }
 
-    @Override
-    public String getAuthority() {
-        return authority.name();
+    /**
+     * Get role value.
+     *
+     * @return Role value.
+     */
+    public RoleEnum getRole() {
+        return this.role;
     }
 
     /**
-     * Set authority value.
+     * Set role value.
      *
-     * @param authority New authority value.
+     * @param role New role value.
      * @return self
      */
-    public Authority setAuthority(AuthorityEnum authority) {
-        this.authority = authority;
+    public Role setRole(RoleEnum role) {
+        this.role = role;
         return this;
     }
 }

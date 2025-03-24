@@ -7,7 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +27,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     /**
@@ -76,50 +80,50 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Disable CSRF because JWT is used
         http.csrf(csrf -> csrf.disable())
-            // Configure routes authorization
-            .authorizeHttpRequests(auth -> auth
+                // Configure routes authorization
+                .authorizeHttpRequests(auth -> auth
                 // Account creation & authentication -> allow all
                 .requestMatchers(
-                    AppRoutes.CREATE_ACCOUNT,
-                    AppRoutes.LOGIN
+                        AppRoutes.CREATE_ACCOUNT,
+                        AppRoutes.LOGIN
                 ).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 // Genereated errors -> allow all
                 .requestMatchers("/error").permitAll()
                 // Other routes -> need authentication
                 .anyRequest().authenticated()
-            )
-            // Enable custom error handlinfs
-            .exceptionHandling(exception -> exception
+                )
+                // Enable custom error handlinfs
+                .exceptionHandling(exception -> exception
                 // 401 Unauthorized
                 .authenticationEntryPoint(this.authenticationEntryPoint)
                 // 403 Forbidden
                 .accessDeniedHandler(this.accessDeniedHandler)
-            )
-            // Set authentication provider
-            .authenticationProvider(this.authenticationProvider)
-            // Configure stateless session
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Set logout page
-            .logout(logout-> 
-                // Define logout URL
-                logout.logoutUrl(AppRoutes.LOGOUT)
-                // Clear authentication context
-                .clearAuthentication(true)
-                // Invalidate session
-                .invalidateHttpSession(true)
-                // Remove session cookie
-                .deleteCookies("JSESSIONID")
-                // Disable logout redirection 
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    // Just send HTTP 200
-                    response.setStatus(HttpServletResponse.SC_OK);
-                })
-                // Allow all to access logout page
-                .permitAll()
-            )
-            // Add JWT filter
-            .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                // Set authentication provider
+                .authenticationProvider(this.authenticationProvider)
+                // Configure stateless session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Set logout page
+                .logout(logout
+                        -> // Define logout URL
+                        logout.logoutUrl(AppRoutes.LOGOUT)
+                        // Clear authentication context
+                        .clearAuthentication(true)
+                        // Invalidate session
+                        .invalidateHttpSession(true)
+                        // Remove session cookie
+                        .deleteCookies("JSESSIONID")
+                        // Disable logout redirection 
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            // Just send HTTP 200
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
+                        // Allow all to access logout page
+                        .permitAll()
+                )
+                // Add JWT filter
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Build security rules
         return http.build();
@@ -137,12 +141,12 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
         // Define authorized headers
         configuration.setAllowedHeaders(List.of(
-            // Bearer token
-            "Authorization", 
-            // Locale to use
-            "Accept-Language",
-            // Content type (to communicate in JSON
-            "Content-Type"
+                // Bearer token
+                "Authorization",
+                // Locale to use
+                "Accept-Language",
+                // Content type (to communicate in JSON
+                "Content-Type"
         ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -150,5 +154,18 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    /**
+     * Define application role hierarchy.
+     *
+     * @return Defined hierarchy.
+     */
+    @Bean
+    public static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withRolePrefix("ROLE_")
+                .role("ADMIN").implies("USER")
+                .role("USER").implies("GUEST")
+                .build();
     }
 }
