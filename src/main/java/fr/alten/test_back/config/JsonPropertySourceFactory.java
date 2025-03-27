@@ -9,7 +9,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
- * Initial data factory, used to parse json file
+ * JSON factory, used to parse json file
  * @author Amarechal
  */
 public class JsonPropertySourceFactory implements PropertySourceFactory {

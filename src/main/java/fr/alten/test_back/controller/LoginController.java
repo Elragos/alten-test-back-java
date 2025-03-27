@@ -61,7 +61,7 @@ public class LoginController {
         // Generate response
         RegisterResponse response = new RegisterResponse()
                 .setEmail(registeredUser.getEmail())
-                .setUsername(registeredUser.getUsername())
+                .setUsername(registeredUser.getRealUsername())
                 .setFirstname(registeredUser.getFirstname());
         // Send response
         return ResponseEntity.ok(response);

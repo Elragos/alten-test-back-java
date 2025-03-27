@@ -1,18 +1,17 @@
 package fr.alten.test_back.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.dto.CreateUserDTO;
+import fr.alten.test_back.dto.CreateUserDto;
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Role;
 import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
+import fr.alten.test_back.helper.InitialDataParser;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +29,8 @@ import fr.alten.test_back.repository.RoleRepository;
  */
 @Configuration
 @PropertySource(
-        value = "classpath:initialData.json",
-        factory = JsonPropertySourceFactory.class
+    value = "classpath:initialData.json",
+    factory = JsonPropertySourceFactory.class
 )
 public class InitialDataConfiguration {
 
@@ -103,29 +102,15 @@ public class InitialDataConfiguration {
      * @throws JsonProcessingException When JSON is malformed.
      */
     private void loadInitialData() throws JsonProcessingException {
-        // User list read from JSON file
-        List<CreateUserDTO> users = new ArrayList();
-
-        // Product list read from JSON file
-        List<ProductDto> products = new ArrayList();
-
-        // Create object mapper to load JSON data
-        ObjectMapper mapper = new ObjectMapper();
-
-        // Load user list as object
-        Object usersObj = this.env.getProperty("users", Object.class);
-        // If it is a list
-        if (usersObj instanceof List) {
-            // Parse it to JSON string
-            String usersJson = mapper.writeValueAsString(usersObj);
-            // Read user list from file
-            users = mapper.readValue(usersJson,
-                new TypeReference<List<CreateUserDTO>>() {
-            });
-        }
-
+        // Load JSON data
+        InitialDataParser parser = new InitialDataParser(
+            new ObjectMapper(),
+            this.env.getProperty("users", Object.class),
+            this.env.getProperty("products", Object.class)
+        );
+     
         // For all users in initial data
-        for (CreateUserDTO userData : users) {
+        for (CreateUserDto userData : parser.getUsers()) {
             // Extract data from JSON
             User toAdd = new User()
                 .setEmail(userData.getEmail())
@@ -142,20 +127,9 @@ public class InitialDataConfiguration {
             // Create user in DB if not exists
             this.createAccount(toAdd);
         }
-
-        Object productsObj = this.env.getProperty("products", Object.class);
-        // If it is a list
-        if (productsObj instanceof List) {
-            // Parse it to JSON string
-            String productsJson = mapper.writeValueAsString(productsObj);
-            // Read user list from file
-            products = mapper.readValue(productsJson,
-                new TypeReference<List<ProductDto>>() {
-            });
-        }
-
+        
         // For all users in initial data
-        for (ProductDto productData : products) {
+        for (ProductDto productData : parser.getProducts()) {
             // Extract data from JSON
             Product toAdd = new Product(productData);
 

@@ -1,4 +1,4 @@
 /**
- * Base application package containing classes to launch or test it.
+ * Base application package containing classes to launch it.
  */
 package fr.alten.test_back;
