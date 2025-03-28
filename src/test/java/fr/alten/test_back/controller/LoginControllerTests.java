@@ -1,10 +1,5 @@
 package fr.alten.test_back.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.TestContainersConfiguration;
-import fr.alten.test_back.TestData;
 import fr.alten.test_back.dto.CreateUserDto;
 import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
@@ -12,22 +7,13 @@ import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.repository.UserRepository;
-import java.util.Map;
 import org.assertj.core.api.Assertions;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -39,46 +25,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author amarechal
  */
-@SpringBootTest
-@Import(TestContainersConfiguration.class)
-@AutoConfigureMockMvc
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LoginControllerTests {
-
-    /**
-     * Used mock to launch HTTP test queries.
-     */
-    @Autowired
-    private MockMvc mockMvc;
-
+public class LoginControllerTests extends BaseControllerTests {
+  
     /**
      * Used userRepository.
      */
     @Autowired
     private UserRepository userRepository;
-
-    /**
-     * Used object mapper to write JSON data.
-     */
-    @Autowired
-    private ObjectMapper mapper;
-
-    /**
-     * Used test data.
-     */
-    @Autowired
-    private TestData data;
-
-    /**
-     * Load test data before testing.
-     *
-     * @throws JsonProcessingException If JSON is malformed.
-     */
-    @BeforeEach
-    public void setUp() throws JsonProcessingException {
-        // Load JSON data
-        this.data.loadData();
-    }
 
     /**
      * Test admin login.
@@ -119,24 +72,12 @@ public class LoginControllerTests {
     public void adminLoggingAsAdmin() throws Exception {
         // Get admin user
         CreateUserDto user = this.data.getUsers().get(0);
-        // Set POST data
-        LoginUserDto loginData = new LoginUserDto()
-            .setEmail(user.getEmail())
-            .setPassword(user.getPassword());
-        // Peform login request and get response
-        MvcResult loginResponse = this.mockMvc.perform(
-            post(AppRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(loginData))
-        ).andReturn();
-        // Parse response
-        Map loginResponseData = this.mapper.readValue(
-            loginResponse.getResponse().getContentAsString(), 
-            new TypeReference<Map<String, Object>>() {}
-        );
+        // Get token
+        String token = this.getJwtToken(user);
         // Get user info
         this.mockMvc.perform(
             get(AppRoutes.USER_INFO)
-                .header("Authorization", "Bearer " + loginResponseData.get("token"))
+                .header("Authorization", "Bearer " + token)
         )
             // Print result
             .andDo(print())
@@ -148,7 +89,6 @@ public class LoginControllerTests {
                     hasItem(RoleEnum.ROLE_ADMIN.name())
                 )
             );
-      
     }
     
     /**
@@ -159,26 +99,16 @@ public class LoginControllerTests {
     @Test
     @Order(3)
     public void userLoggingAsUser() throws Exception {
-        // Get admin user
+        // Get user
         CreateUserDto user = this.data.getUsers().get(1);
-        // Set POST data
-        LoginUserDto loginData = new LoginUserDto()
-            .setEmail(user.getEmail())
-            .setPassword(user.getPassword());
-        // Peform login request and get response
-        MvcResult loginResponse = this.mockMvc.perform(
-            post(AppRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(loginData))
-        ).andReturn();
-        // Parse response
-        Map loginResponseData = this.mapper.readValue(
-            loginResponse.getResponse().getContentAsString(), 
-            new TypeReference<Map<String, Object>>() {}
-        );
+      
+        // Get token
+        String token = this.getJwtToken(user);
+        
         // Get user info
         this.mockMvc.perform(
             get(AppRoutes.USER_INFO)
-                .header("Authorization", "Bearer " + loginResponseData.get("token"))
+                .header("Authorization", "Bearer " + token)
         )
             // Print result
             .andDo(print())
