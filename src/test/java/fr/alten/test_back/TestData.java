@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.config.JsonPropertySourceFactory;
 import fr.alten.test_back.dto.CreateUserDto;
 import fr.alten.test_back.dto.ProductDto;
-import fr.alten.test_back.helper.InitialDataParser;
+import fr.alten.test_back.helper.JsonDataParser;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @PropertySource(
-        value = "classpath:initialData.json",
+        value = "classpath:testData.json",
         factory = JsonPropertySourceFactory.class
 )
 public class TestData {
@@ -47,7 +47,7 @@ public class TestData {
      */
     public void loadData() throws JsonProcessingException {
         // Load JSON data
-        InitialDataParser parser = new InitialDataParser(
+        JsonDataParser parser = new JsonDataParser(
             new ObjectMapper(),
             this.env.getProperty("users", Object.class),
             this.env.getProperty("products", Object.class)

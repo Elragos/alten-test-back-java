@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author User
  */
-public class InitialDataParser {
+public class JsonDataParser {
 
     private List<CreateUserDto> users;
 
@@ -25,7 +25,7 @@ public class InitialDataParser {
      * @param productsObj Object containing products.
      * @throws JsonProcessingException If JSON is malformed.
      */
-    public InitialDataParser(
+    public JsonDataParser(
             ObjectMapper mapper,
             Object usersObj,
             Object productsObj

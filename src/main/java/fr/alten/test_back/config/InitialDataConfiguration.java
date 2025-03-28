@@ -8,7 +8,7 @@ import fr.alten.test_back.entity.Role;
 import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
-import fr.alten.test_back.helper.InitialDataParser;
+import fr.alten.test_back.helper.JsonDataParser;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -103,7 +103,7 @@ public class InitialDataConfiguration {
      */
     private void loadInitialData() throws JsonProcessingException {
         // Load JSON data
-        InitialDataParser parser = new InitialDataParser(
+        JsonDataParser parser = new JsonDataParser(
             new ObjectMapper(),
             this.env.getProperty("users", Object.class),
             this.env.getProperty("products", Object.class)
