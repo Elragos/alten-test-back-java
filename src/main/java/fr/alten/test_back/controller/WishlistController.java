@@ -11,6 +11,7 @@ import fr.alten.test_back.repository.WishlistRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,16 +53,16 @@ public class WishlistController {
      * @return Current user's wishlist product list.
      */
     @GetMapping
-    public Iterable<Product> listProducts() {
+    public ResponseEntity<Iterable<Product>> listProducts() {
         Wishlist wishlist = getCurrentUserWishlist();
 
         // If user has no wishlist yet
         if (wishlist == null) {
             // Return empty list
-            return List.of();
+            return ResponseEntity.ok(List.of());
         }
         // Else return wishlist product list
-        return wishlist.getProducts();
+        return ResponseEntity.ok(wishlist.getProducts());
     }
 
     /**
@@ -71,7 +72,7 @@ public class WishlistController {
      * @return Updated wishlist product list.
      */
     @PostMapping("/{id}")
-    public Iterable<Product> addProduct(@PathVariable Integer id) {
+    public ResponseEntity<Iterable<Product>> addProduct(@PathVariable Integer id) {
         // Get user wishlist        
         Wishlist wishlist = this.getCurrentUserWishlist();
         // If wishlist not created
@@ -94,7 +95,7 @@ public class WishlistController {
         // Save wishlist to DB
         wishlist = this.wishlistRepository.save(wishlist);
         // Return updated wishlist
-        return wishlist.getProducts();
+        return ResponseEntity.ok(wishlist.getProducts());
     }
 
     /**
@@ -104,13 +105,13 @@ public class WishlistController {
      * @return Deleted product.
      */
     @DeleteMapping("/{id}")
-    public Iterable<Product> removeProduct(@PathVariable Integer id) {
+    public ResponseEntity<Iterable<Product>> removeProduct(@PathVariable Integer id) {
         // Get user wishlist        
         Wishlist wishlist = this.getCurrentUserWishlist();
         // If wishlist not created
         if (wishlist == null) {
             // Return empty list
-            return List.of();
+            return ResponseEntity.ok(List.of());
         }
         // Find product to remove
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
@@ -119,7 +120,7 @@ public class WishlistController {
         // Save wishlist to DB
         wishlist = this.wishlistRepository.save(wishlist);
         // Return updated wishlist
-        return wishlist.getProducts();
+        return ResponseEntity.ok(wishlist.getProducts());
 
     }
 
