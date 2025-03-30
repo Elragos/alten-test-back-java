@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class LoginControllerTests extends BaseControllerTests {
   
     /**
-     * Used userRepository.
+     * Used user repository.
      */
     @Autowired
     private UserRepository userRepository;

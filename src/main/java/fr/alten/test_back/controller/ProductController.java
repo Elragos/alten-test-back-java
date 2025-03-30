@@ -2,10 +2,15 @@ package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
+import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.ProductHelper;
+import fr.alten.test_back.helper.Translator;
 import fr.alten.test_back.repository.ProductRepository;
+import java.net.URI;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +42,8 @@ public class ProductController {
      * @return Available product list.
      */
     @GetMapping
-    public Iterable<Product> listProducts() {
-        return this.productRepository.findAll();
+    public ResponseEntity<Iterable<Product>> listProducts() {
+        return ResponseEntity.ok(this.productRepository.findAll());
     }
 
     /**
@@ -48,9 +53,11 @@ public class ProductController {
      * @return Product info, or 404 error if not found.
      */
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable Integer id) {
+    public ResponseEntity<Product> getProduct(@PathVariable Integer id) {
         // Return product info.
-        return ProductHelper.findProduct(id, this.productRepository);
+        return ResponseEntity.ok(
+            ProductHelper.findProduct(id, this.productRepository)
+        );
     }
 
     /**
@@ -61,15 +68,30 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Product addProduct(@RequestBody ProductDto newProductData) {
-        // Check if user admin before proceed
-        //.checkAdminAuthenticated();
-        // Create new product from DTO
+    public ResponseEntity<URI> addProduct(@RequestBody ProductDto newProductData) {
+        // Try to find same product code
+        Optional<Product> existing = this.productRepository
+            .findByCode(newProductData.getCode());
+        // If found
+        if (existing.isPresent()){
+            // Send bad request error
+            throw new InvalidPayloadException(
+                Translator.translate(
+                    "error.product.codeAlreadyUsed", 
+                    new Object[]{newProductData.getCode()}
+                )
+            );
+        }
+        
+        // Else create new product from DTO
         Product createdProduct = new Product(newProductData);
         // Save created product to DB
         createdProduct = this.productRepository.save(createdProduct);
-        // Return created product
-        return createdProduct;
+        // Return created product URL
+        return ResponseEntity.created(
+            URI.create(AppRoutes.PRODUCT + "/" + createdProduct.getId())
+        ).build();
+        
     }
 
     /**
@@ -81,10 +103,21 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    public Product updateProduct(@PathVariable Integer id,
+    public ResponseEntity<Product> updateProduct(@PathVariable Integer id,
             @RequestBody ProductDto newProductData) {
-        // Check if user admin before proceed
-        // ControllerHelper.checkAdminAuthenticated();
+        // Get product by sending product code
+        Optional<Product> collidingCode = this.productRepository
+            .findByCode(newProductData.getCode());
+        
+        // If found and not same product ID
+        if (collidingCode.isPresent() && !collidingCode.get().getId().equals(id)){
+            // Throw error
+            throw new InvalidPayloadException(Translator.translate(
+                "error.product.codeAlreadyUsed", 
+                new Object[]{ newProductData.getCode() }
+            ));
+        }        
+        
         // Get product to update
         Product update = ProductHelper.findProduct(id, this.productRepository);
         // Update product info from DTO
@@ -92,7 +125,7 @@ public class ProductController {
         // Save updated product to DB
         this.productRepository.save(update);
         // Return updated product
-        return update;
+        return ResponseEntity.ok(update);
     }
 
     /**
@@ -103,15 +136,12 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public Product removeProduct(@PathVariable Integer id) {
-        // Check if user admin before proceed
-        //ControllerHelper.checkAdminAuthenticated();
+    public ResponseEntity<Product> removeProduct(@PathVariable Integer id) {
         // Find product in DB
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         // Remove product from DB
         this.productRepository.delete(toRemove);
         // Return deleted product info.
-        return toRemove;
+        return ResponseEntity.ok(toRemove);
     }
-
 }

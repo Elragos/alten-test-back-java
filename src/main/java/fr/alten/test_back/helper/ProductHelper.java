@@ -23,7 +23,7 @@ public class ProductHelper {
             throws ResourceNotFoundException {
         return repo.findById(productId).orElseThrow(()->
             new ResourceNotFoundException(Translator.translate(
-                "error.product.notFound", 
+                "error.product.idNotFound", 
                 new Object[]{productId}
             ))
         );

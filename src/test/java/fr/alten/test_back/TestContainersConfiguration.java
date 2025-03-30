@@ -23,9 +23,9 @@ public class TestContainersConfiguration {
      */
     static {
         MYSQL_CONTAINER = new MySQLContainer<>("mysql:latest")
-                .withDatabaseName("testdb")
-                .withUsername("user")
-                .withPassword("password");
+            .withDatabaseName("testdb")
+            .withUsername("user")
+            .withPassword("password");
         MYSQL_CONTAINER.start();
     }
 
