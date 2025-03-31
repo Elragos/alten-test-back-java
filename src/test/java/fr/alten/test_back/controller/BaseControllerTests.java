@@ -51,7 +51,7 @@ public class BaseControllerTests {
     protected TestData data;
 
     /**
-     * Load test data before testing.
+     * Load test data before each test.
      *
      * @throws JsonProcessingException If JSON is malformed.
      */

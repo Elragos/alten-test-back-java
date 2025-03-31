@@ -116,12 +116,12 @@ public class ProductControllerTests extends BaseControllerTests {
         String token = this.getJwtToken(user);
 
         // Get test product code
-        int productId = 1;
-        String productCode = this.productRepository.findById(productId)
-                .orElseThrow().getCode();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
 
         // Get product details
-        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/" + productId)
+        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/" + product.getId())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -129,7 +129,8 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test sent product is the one expected
-            .andExpect(jsonPath("$.code", is(productCode)));
+            .andExpect(jsonPath("$.code", is(product.getCode())))
+            ;
     }
 
     /**
@@ -325,7 +326,9 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         // Update only description
         String newDescription = "Description updated";
         ProductDto productData = new ProductDto().setDescription(newDescription);
@@ -367,7 +370,9 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();;
         // Update only code
         String newCode = "Code updated";
         ProductDto productData = new ProductDto().setCode(newCode);
@@ -406,7 +411,9 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         // Update only code
         String newCode = product.getCode();
         ProductDto productData = new ProductDto().setCode(newCode);
@@ -445,8 +452,12 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
         // Get products from DB
-        Product updatedProduct = this.productRepository.findById(1).orElseThrow();
-        Product collidingProduct = this.productRepository.findById(2).orElseThrow();
+        ProductDto updatedDto = this.data.getProducts().get(0);
+        Product updatedProduct = this.productRepository
+            .findByCode(updatedDto.getCode()).orElseThrow();
+        ProductDto collidingDto = this.data.getProducts().get(1);
+        Product collidingProduct = this.productRepository
+            .findByCode(collidingDto.getCode()).orElseThrow();
         // Update only code
         String newCode = collidingProduct.getCode();
         ProductDto productData = new ProductDto().setCode(newCode);
@@ -568,7 +579,9 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
 
         // Delete product
         this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + product.getId())
