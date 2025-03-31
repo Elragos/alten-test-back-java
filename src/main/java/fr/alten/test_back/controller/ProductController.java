@@ -2,12 +2,15 @@ package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
+import fr.alten.test_back.entity.Wishlist;
 import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.ProductHelper;
 import fr.alten.test_back.helper.Translator;
 import fr.alten.test_back.repository.ProductRepository;
+import fr.alten.test_back.repository.WishlistRepository;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +38,12 @@ public class ProductController {
      */
     @Autowired
     private ProductRepository productRepository;
+    
+    /**
+     * Used Wishlist repository.
+     */
+    @Autowired
+    private WishlistRepository wishlistRepository;
 
     /**
      * List all available products.
@@ -139,6 +148,14 @@ public class ProductController {
     public ResponseEntity<Product> removeProduct(@PathVariable Integer id) {
         // Find product in DB
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
+        // Remove it from all wishlists
+        List<Wishlist> wishlists = this.wishlistRepository
+            .findByProductsContaining(toRemove);
+        for (Wishlist current : wishlists){
+            current.removeProduct(toRemove);
+            this.wishlistRepository.save(current);
+        }
+        
         // Remove product from DB
         this.productRepository.delete(toRemove);
         // Return deleted product info.

@@ -1,8 +1,8 @@
 package fr.alten.test_back.repository;
 
-import fr.alten.test_back.entity.User;
+import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.Wishlist;
-import java.util.Optional;
+import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -11,5 +11,5 @@ import org.springframework.data.repository.CrudRepository;
  * @author Amarechal
  */
 public interface WishlistRepository extends CrudRepository<Wishlist, Integer> {
-    
+    List<Wishlist> findByProductsContaining(Product product);
 }

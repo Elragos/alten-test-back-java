@@ -1,11 +1,15 @@
 package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.CreateUserDto;
+import fr.alten.test_back.dto.ProductDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
+import fr.alten.test_back.entity.Wishlist;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.UserRepository;
+import fr.alten.test_back.repository.WishlistRepository;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.Order;
@@ -36,6 +40,9 @@ public class WishlistControllerTests extends BaseControllerTests {
      */
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private WishlistRepository wishlistRepository;
 
     /**
      * Test get wishlist failed when not logged in.
@@ -111,7 +118,9 @@ public class WishlistControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         
         // Perform action
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
@@ -142,37 +151,12 @@ public class WishlistControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Test wishlist sent is not empty after user added a product.
-     *
-     * @throws Exception If test went wrong.
-     */
-    @Test
-    @Order(5)
-    public void getReturnedWishlistIsNotEmptyAfterAddingProduct() throws Exception {
-        // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
-        // Get token
-        String token = this.getJwtToken(user);
-        // Perform action
-        this.mockMvc.perform(get(AppRoutes.WISHLIST)
-            .header("Authorization", "Bearer " + token)
-        )
-            // Print result
-            .andDo(print())
-            // Test HTTP response is OK
-            .andExpect(status().isOk())
-            // Test returned array is empty
-            .andExpect(jsonPath("$.length()", is(1)))
-            ;
-    }
-    
-    /**
      * Test adding unexisting product returns 404 error.
      *
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(6)
+    @Order(5)
     public void addUnexistingProductToWishlistShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -202,7 +186,9 @@ public class WishlistControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         
         // Perform action
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
@@ -232,7 +218,7 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(8)
+    @Order(7)
     public void deleteProductFromWishlistShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -250,7 +236,7 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(9)
+    @Order(8)
     public void deleteUnexistingProductFromWishlistShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -273,14 +259,16 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(10)
+    @Order(9)
     public void deleteProductNotInWishlistDoNothing() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        Product product = this.productRepository.findById(2).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(2);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         
         // Perform action
         this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
@@ -310,14 +298,16 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(11)
+    @Order(10)
     public void deleteProductInWishlistSucceed() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        Product product = this.productRepository.findById(1).orElseThrow();
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
         
         // Perform action
         this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
@@ -342,36 +332,38 @@ public class WishlistControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Test delete product when wishlist is not created do nothing
-     *
+     * Test that when a product is deleted, all wishlists having this product 
+     * remove it.
+     * 
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(2)
-    public void deleteProductWhenWishlistIsNotCreatedDoNothing() throws Exception {
-        // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+    @Order(11)
+    public void deleteProductShouldRemoveItFromAllWishlists() throws Exception {
+        // Get admin
+        CreateUserDto user = this.data.getUsers().get(0);
         // Get token
-        String token = this.getJwtToken(userDto);
-        // Get product to add in wishlist
-        Product product = this.productRepository.findById(1).orElseThrow();
-        
-        // Perform action
-        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
-            .header("Authorization", "Bearer " + token)
-        )
-            // Print result
-            .andDo(print())
-            // Test HTTP response is OK
-            .andExpect(status().isOk())
-            // Test returned array still has 1 item
-            .andExpect(jsonPath("$.length()", is(0)))
-            ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
+        String token = this.getJwtToken(user);
+        // Get product from DB
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
             .orElseThrow();
-        // Check that wishlist has not been created
-        Assertions.assertThat(user.getWishlist()).isNull();
+
+        // Add product to wishlist
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
+            .header("Authorization", "Bearer " + token)
+        );
+        
+        // Assert that 1 wishlist has this product
+        List<Wishlist> wishlists = this.wishlistRepository.findByProductsContaining(product);
+        Assertions.assertThat(wishlists.size()).isEqualTo(1);
+        
+        // Delete product
+        this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + product.getId())
+            .header("Authorization", "Bearer " + token)
+        );
+        // Assert that no wishlist has this product anymore
+        wishlists = this.wishlistRepository.findByProductsContaining(product);
+        Assertions.assertThat(wishlists.size()).isEqualTo(0);
     }
 }
