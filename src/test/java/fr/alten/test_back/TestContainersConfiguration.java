@@ -1,6 +1,7 @@
 package fr.alten.test_back;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.time.Duration;
 import javax.sql.DataSource;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,8 @@ public class TestContainersConfiguration {
         MYSQL_CONTAINER = new MySQLContainer<>("mysql:latest")
             .withDatabaseName("testdb")
             .withUsername("user")
-            .withPassword("password");
+            .withPassword("password")
+            .withMinimumRunningDuration(Duration.ofSeconds(10));
         MYSQL_CONTAINER.start();
     }
 
