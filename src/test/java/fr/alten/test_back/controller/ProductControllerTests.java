@@ -66,7 +66,7 @@ public class ProductControllerTests extends BaseControllerTests {
         String token = this.getJwtToken(user);
 
         // Get test products' code
-        ArrayList<String> productCodes = new ArrayList();
+        ArrayList<String> productCodes = new ArrayList<>();
         this.productRepository.findAll().forEach(product -> 
             productCodes.add(product.getCode())
         );

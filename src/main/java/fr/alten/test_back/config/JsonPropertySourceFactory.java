@@ -1,5 +1,6 @@
 package fr.alten.test_back.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
@@ -19,8 +20,10 @@ public class JsonPropertySourceFactory implements PropertySourceFactory {
             String name,
             EncodedResource resource
     ) throws IOException {
-        Map<String, Object> readValue = new ObjectMapper()
-                .readValue(resource.getInputStream(), Map.class);
+        Map<String, Object> readValue = new ObjectMapper().readValue(
+            resource.getInputStream(),
+            new TypeReference<Map<String, Object>>() {}
+        );
 
         String filename = resource.getResource().getFilename();
         if (filename == null){
