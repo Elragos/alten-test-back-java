@@ -145,7 +145,7 @@ public class SecurityConfiguration {
                 "Authorization",
                 // Locale to use
                 "Accept-Language",
-                // Content type (to communicate in JSON
+                // Content type (to communicate in JSON)
                 "Content-Type"
         ));
 
