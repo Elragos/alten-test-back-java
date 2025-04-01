@@ -326,7 +326,7 @@ public class WishlistControllerTests extends BaseControllerTests {
             .orElseThrow();
         // Check that wishlist has been created
         Assertions.assertThat(user.getWishlist()).isNotNull();
-        // Check that product wishlist still has 1 item
+        // Check that product wishlist is now empty
         Assertions.assertThat(user.getWishlist().getProducts().size())
             .isEqualTo(0);
     }
