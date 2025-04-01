@@ -1,5 +1,6 @@
 package fr.alten.test_back.controller;
 
+import fr.alten.test_back.dto.AddProductToCartDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
@@ -10,6 +11,7 @@ import fr.alten.test_back.repository.ProductRepository;
 import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,8 +43,8 @@ public class CartController {
      * @return Cart item list.
      */
     @GetMapping
-    public Cart getCart(HttpSession session) {
-        return Cart.getSessionCart(session);
+    public ResponseEntity<Cart> getCart(HttpSession session) {
+        return ResponseEntity.ok(Cart.getSessionCart(session));
     }
 
     /**
@@ -54,29 +56,20 @@ public class CartController {
      * @return Updated cart item list.
      */
     @PostMapping("/{id}")
-    public Cart addProduct(
+    public ResponseEntity<Cart> addProduct(
             HttpSession session,
-            @RequestBody Map<String, String> payload,
+            @RequestBody AddProductToCartDto payload,
             @PathVariable int id
     ) {
-        Integer quantity;
-        try {
-            quantity = Integer.valueOf(payload.get("quantity"));
-        } catch (NumberFormatException | NullPointerException ex) {
-            throw new InvalidPayloadException(
-                Translator.translate("error.cart.invalidQuantity", null)
-            );
-        }
-
         Cart cart = Cart.getSessionCart(session);
         Product toAdd = ProductHelper.findProduct(id, this.productRepository);
-        cart.addItem(quantity, toAdd);
+        cart.addItem(payload.getQuantity(), toAdd);
         cart.saveInSession(session);
-        return cart;
+        return ResponseEntity.ok(cart);
     }
 
     @DeleteMapping("/{id}")
-    public Cart removeProduct(
+    public ResponseEntity<Cart> removeProduct(
             HttpSession session,
             @PathVariable int id
     ) {
@@ -84,6 +77,6 @@ public class CartController {
         Product toRemove = ProductHelper.findProduct(id, this.productRepository);
         cart.removeItem(toRemove);
         cart.saveInSession(session);
-        return cart;
+        return ResponseEntity.ok(cart);
     }
 }
