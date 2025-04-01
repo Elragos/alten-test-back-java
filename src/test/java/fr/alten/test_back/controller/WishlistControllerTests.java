@@ -148,6 +148,20 @@ public class WishlistControllerTests extends BaseControllerTests {
         Assertions.assertThat(
             user.getWishlist().getProducts().get(0).getId()
         ).isEqualTo(product.getId());
+        
+         // Get wishlist from server
+        this.mockMvc.perform(get(AppRoutes.WISHLIST)
+            .header("Authorization", "Bearer " + token)
+        )
+            // Print result
+            .andDo(print())
+            // Test HTTP response is OK
+            .andExpect(status().isOk())
+            // Test returned array has 1 item
+            .andExpect(jsonPath("$.length()", is(1)))
+            // Test returned added product has expected code
+            .andExpect(jsonPath("$[0].code", is(product.getCode())))
+            ;
     }
     
     /**
@@ -317,7 +331,7 @@ public class WishlistControllerTests extends BaseControllerTests {
             .andDo(print())
             // Test HTTP response is OK
             .andExpect(status().isOk())
-            // Test returned array still has 1 item
+            // Test returned array has no item
             .andExpect(jsonPath("$.length()", is(0)))
             ;
         
@@ -332,13 +346,49 @@ public class WishlistControllerTests extends BaseControllerTests {
     }
     
     /**
+     * Test delete product when wishlist is not created do nothing.
+     *
+     * @throws Exception If test went wrong.
+     */
+    @Test
+    @Order(11)
+    public void deleteProductWhenNoWishlistDoNothing() throws Exception {
+        // Get user
+        CreateUserDto userDto = this.data.getUsers().get(0);
+        // Get token
+        String token = this.getJwtToken(userDto);
+        // Get product to add in wishlist
+        ProductDto dto = this.data.getProducts().get(0);
+        Product product = this.productRepository.findByCode(dto.getCode())
+            .orElseThrow();
+        
+        // Perform action
+        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
+            .header("Authorization", "Bearer " + token)
+        )
+            // Print result
+            .andDo(print())
+            // Test HTTP response is OK
+            .andExpect(status().isOk())
+            // Test returned array has no item
+            .andExpect(jsonPath("$.length()", is(0)))
+            ;
+        
+        // Get user from DB
+        User user = this.userRepository.findByEmail(userDto.getEmail())
+            .orElseThrow();
+        // Check that wishlist has not been created
+        Assertions.assertThat(user.getWishlist()).isNull();
+    }
+    
+    /**
      * Test that when a product is deleted, all wishlists having this product 
      * remove it.
      * 
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(11)
+    @Order(12)
     public void deleteProductShouldRemoveItFromAllWishlists() throws Exception {
         // Get admin
         CreateUserDto user = this.data.getUsers().get(0);
