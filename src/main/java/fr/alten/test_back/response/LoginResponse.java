@@ -1,5 +1,7 @@
 package fr.alten.test_back.response;
 
+import java.util.Date;
+
 /**
  * User login response.
  *
@@ -15,7 +17,7 @@ public class LoginResponse {
     /**
      * JWT token expiration time (in milliseconds).
      */
-    private long expiresIn;
+    private Date expiresAt;
 
     /**
      * Get JWT token.
@@ -23,7 +25,7 @@ public class LoginResponse {
      * @return JWT token.
      */
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     /**
@@ -38,22 +40,22 @@ public class LoginResponse {
     }
 
     /**
-     * Get JWT token expiration time (in milliseconds).
+     * Get JWT token expiration date.
      *
-     * @return JWT token expiration time (in milliseconds).
+     * @return JWT token expiration date.
      */
-    public long getExpiresIn() {
-        return expiresIn;
+    public Date getExpiresAt() {
+        return this.expiresAt;
     }
 
     /**
-     * Set JWT token expiration time (in milliseconds).
+     * Set JWT token expiration date.
      *
-     * @param expiresIn New JWT token expiration time (in milliseconds).
+     * @param expiresAt New JWT token expiration date.
      * @return self
      */
-    public LoginResponse setExpiresIn(long expiresIn) {
-        this.expiresIn = expiresIn;
+    public LoginResponse setExpiresAt(Date expiresAt) {
+        this.expiresAt = expiresAt;
         return this;
     }
 

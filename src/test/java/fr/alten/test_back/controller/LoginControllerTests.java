@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,8 +29,11 @@ public class LoginControllerTests extends BaseControllerTests {
     /**
      * Used user repository.
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public LoginControllerTests(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
 
     /**
      * Test admin login.
@@ -42,7 +44,7 @@ public class LoginControllerTests extends BaseControllerTests {
     @Order(1)
     public void adminLoginShouldSucceed() throws Exception {
         // Get admin user
-        CreateUserDto admin = this.data.getUsers().get(0);
+        CreateUserDto admin = this.data.getUsers().getFirst();
         // Set POST data
         LoginUserDto loginData = new LoginUserDto()
                 .setEmail(admin.getEmail())
@@ -58,8 +60,8 @@ public class LoginControllerTests extends BaseControllerTests {
             .andExpect(status().isOk())
             // Test token is in response
             .andExpect(jsonPath("$.token").isNotEmpty())
-            // Test expiresIn in response
-            .andExpect(jsonPath("$.expiresIn").isNotEmpty());
+            // Test expiresAt in response
+            .andExpect(jsonPath("$.expiresAt").isNotEmpty());
     }
     
     /**
@@ -71,7 +73,7 @@ public class LoginControllerTests extends BaseControllerTests {
     @Order(2)
     public void adminLoggingAsAdmin() throws Exception {
         // Get admin user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get user info
@@ -207,7 +209,7 @@ public class LoginControllerTests extends BaseControllerTests {
     @Test
     @Order(6)
     public void cannotReuseSameEmail() throws Exception {        
-        RegisterUserDto dto = this.data.getUsers().get(0);
+        RegisterUserDto dto = this.data.getUsers().getFirst();
         
         this.mockMvc.perform(
             post(AppRoutes.CREATE_ACCOUNT).contentType(MediaType.APPLICATION_JSON)

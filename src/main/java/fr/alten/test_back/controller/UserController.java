@@ -4,6 +4,7 @@ import fr.alten.test_back.dto.LoginUserDto;
 import fr.alten.test_back.dto.RegisterUserDto;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.helper.AppRoutes;
+import fr.alten.test_back.helper.JwtToken;
 import fr.alten.test_back.response.LoginResponse;
 import fr.alten.test_back.response.RegisterResponse;
 import fr.alten.test_back.service.AuthenticationService;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @author AMarechal
  */
 @RestController
-public class LoginController {
+public class UserController {
 
     /**
      * Used JWT service.
@@ -41,8 +42,10 @@ public class LoginController {
      * @param jwtService Used JWT service.
      * @param authenticationService Used authentication service.
      */
-    public LoginController(JwtService jwtService,
-            AuthenticationService authenticationService) {
+    public UserController(
+        JwtService jwtService,
+        AuthenticationService authenticationService
+    ) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
     }
@@ -80,12 +83,12 @@ public class LoginController {
         User authenticatedUser = this.authenticationService.authenticate(loginUserDto);
 
         // Generate JWT token
-        String jwtToken = this.jwtService.generateToken(authenticatedUser);
+        JwtToken jwtToken = this.jwtService.generateToken(authenticatedUser);
 
         // Generate response
         LoginResponse loginResponse = new LoginResponse()
-                .setToken(jwtToken)
-                .setExpiresIn(this.jwtService.getExpirationTime());
+            .setToken(jwtToken.getValue())
+            .setExpiresAt(jwtToken.getExpirationDate());
 
         // Send response
         return ResponseEntity.ok(loginResponse);

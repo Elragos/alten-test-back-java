@@ -1,5 +1,6 @@
 package fr.alten.test_back.service;
 
+import fr.alten.test_back.helper.JwtToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,14 +28,22 @@ public class JwtService {
     /**
      * Security key.
      */
-    @Value("${security.jwt.secret-key}")
-    private String secretKey;
+    private final String secretKey;
 
     /**
      * Configured expiration time (in milliseconds).
      */
-    @Value("${security.jwt.expiration-time}")
-    private long jwtExpiration;
+    private final long jwtExpiration;
+
+    public JwtService(
+        @Value("${security.jwt.secret-key}")
+        String secretKey,
+        @Value("${security.jwt.expiration-time}")
+        long jwtExpiration
+    ){
+        this.secretKey = secretKey;
+        this.jwtExpiration = jwtExpiration;
+    }
 
     /**
      * Extract user name from token.
@@ -49,8 +58,8 @@ public class JwtService {
     /**
      * Extract field from JWT token.
      *
-     * @param <T> Field data type.
-     * @param token User JWT token.
+     * @param <T>            Field data type.
+     * @param token          User JWT token.
      * @param claimsResolver Token resolver.
      * @return Found field.
      */
@@ -65,8 +74,8 @@ public class JwtService {
      * @param userDetails User info.
      * @return Generated JWT token.
      */
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public JwtToken generateToken(UserDetails userDetails) {
+        return this.generateToken(new HashMap<>(), userDetails);
     }
 
     /**
@@ -76,17 +85,8 @@ public class JwtService {
      * @param userDetails User info.
      * @return Generated JWT token.
      */
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
-    }
-
-    /**
-     * Get token expiration time (in milliseconds).
-     *
-     * @return Token expiration time (in milliseconds).
-     */
-    public long getExpirationTime() {
-        return jwtExpiration;
+    public JwtToken generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        return this.buildToken(extraClaims, userDetails, this.jwtExpiration);
     }
 
     /**
@@ -94,42 +94,48 @@ public class JwtService {
      *
      * @param extraClaims Token extra info.
      * @param userDetails User info.
-     * @param expiration Token expiration time (in milliseconds).
+     * @param expiration  Token expiration time (in milliseconds).
      * @return Generated JWT token.
      */
-    private String buildToken(
+    private JwtToken buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
             long expiration
     ) {
         // Create new token builder
-        return Jwts.builder()
-            // Set extra info
-            .setClaims(extraClaims)
-            // Set user info
-            .setSubject(userDetails.getUsername())
-            // Set token creation date
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            // Set token expiration time
-            .setExpiration(new Date(System.currentTimeMillis() + expiration))
-            // Set token signature key
-            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-            // Generate token
-            .compact();
+        Date now = new Date(System.currentTimeMillis());
+        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+        String tokenValue = Jwts.builder()
+                // Set extra info
+                .setClaims(extraClaims)
+                // Set user info
+                .setSubject(userDetails.getUsername())
+                // Set token creation date
+                .setIssuedAt(now)
+                // Set token expiration time
+                .setExpiration(expirationDate)
+                // Set token signature key
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                // Generate token
+                .compact();
+
+        return new JwtToken()
+                .setValue(tokenValue)
+                .setExpirationDate(expirationDate);
     }
 
     /**
      * Validate token.
      *
-     * @param token Tested JWT token.
+     * @param token       Tested JWT token.
      * @param userDetails Compared User details.
      * @return <code>true</code> if token valid, <code>false</code> otherwise.
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         // Get token user name
-        final String username = extractUsername(token);
+        final String username = this.extractUsername(token);
         // Compare it with user info, and check if token not expired
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return (username.equals(userDetails.getUsername())) && !this.isTokenExpired(token);
     }
 
     /**
@@ -139,7 +145,7 @@ public class JwtService {
      * @return <code>true</code> if token expired, <code>false</code> otherwise.
      */
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return this.extractExpiration(token).before(new Date());
     }
 
     /**
@@ -149,7 +155,7 @@ public class JwtService {
      * @return Token expiration date.
      */
     private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return this.extractClaim(token, Claims::getExpiration);
     }
 
     /**
@@ -161,14 +167,14 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         // Create JWT parser
         return Jwts.parserBuilder()
-            // Set used signature key
-            .setSigningKey(getSignInKey())
-            // Generate parser
-            .build()
-            // Parse token inforamtion
-            .parseClaimsJws(token)
-            // Get token content
-            .getBody();
+                // Set used signature key
+                .setSigningKey(this.getSignInKey())
+                // Generate parser
+                .build()
+                // Parse token information
+                .parseClaimsJws(token)
+                // Get token content
+                .getBody();
     }
 
     /**
