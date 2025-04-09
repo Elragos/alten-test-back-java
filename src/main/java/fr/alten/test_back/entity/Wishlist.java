@@ -1,13 +1,7 @@
 package fr.alten.test_back.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +100,7 @@ public class Wishlist {
      */
     public Wishlist removeProduct(Product toRemove) {
         // If product list exists and contains product to remove
-        if (this.products != null && this.products.contains(toRemove)) {
+        if (this.products != null) {
             // Remove product from list
             this.products.remove(toRemove);
         }

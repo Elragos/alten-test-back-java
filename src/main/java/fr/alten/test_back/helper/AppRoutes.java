@@ -10,7 +10,7 @@ public final class AppRoutes {
     /**
      * Product base route.
      */
-    public static final String PRODUCT = "/product";
+    public static final String PRODUCT = "/products";
 
     /**
      * Cart base route.

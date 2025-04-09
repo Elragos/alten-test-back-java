@@ -2,12 +2,13 @@ package fr.alten.test_back.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Map;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * JSON factory, used to parse json file
@@ -22,7 +23,7 @@ public class JsonPropertySourceFactory implements PropertySourceFactory {
     ) throws IOException {
         Map<String, Object> readValue = new ObjectMapper().readValue(
             resource.getInputStream(),
-            new TypeReference<Map<String, Object>>() {}
+            new TypeReference<>() {}
         );
 
         String filename = resource.getResource().getFilename();

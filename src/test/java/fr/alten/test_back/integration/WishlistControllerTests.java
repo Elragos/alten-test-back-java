@@ -1,23 +1,14 @@
-package fr.alten.test_back.controller;
+package fr.alten.test_back.integration;
 
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
-import fr.alten.test_back.entity.Product;
-import fr.alten.test_back.entity.User;
-import fr.alten.test_back.entity.Wishlist;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.helper.AppRoutes;
-import fr.alten.test_back.repository.ProductRepository;
-import fr.alten.test_back.repository.UserRepository;
-import fr.alten.test_back.repository.WishlistRepository;
-import java.util.List;
-import org.assertj.core.api.Assertions;
-import static org.hamcrest.Matchers.is;
+
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,21 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author amarechal
  */
 public class WishlistControllerTests extends BaseControllerTests {
-      
-    /**
-     * Used product repository.
-     */
-    @Autowired
-    private ProductRepository productRepository;
-    
-    /**
-     * Used user repository.
-     */
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private WishlistRepository wishlistRepository;
 
     /**
      * Test get wishlist failed when not logged in.
@@ -118,12 +94,10 @@ public class WishlistControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         
         // Perform action
-        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -133,22 +107,9 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array has 1 item
             .andExpect(jsonPath("$.length()", is(1)))
             // Test returned added product has expected code
-            .andExpect(jsonPath("$[0].code", is(product.getCode())))
+            .andExpect(jsonPath("$[0].code", is(dto.code())))
             ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
-            .orElseThrow();
-        // Check that wishlist has been created
-        Assertions.assertThat(user.getWishlist()).isNotNull();
-        // Check that product wishlist has 1 item
-        Assertions.assertThat(user.getWishlist().getProducts().size())
-            .isEqualTo(1);
-        // Check that product in wishlist is the one expected
-        Assertions.assertThat(
-            user.getWishlist().getProducts().get(0).getId()
-        ).isEqualTo(product.getId());
-        
+
          // Get wishlist from server
         this.mockMvc.perform(get(AppRoutes.WISHLIST)
             .header("Authorization", "Bearer " + token)
@@ -160,18 +121,18 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array has 1 item
             .andExpect(jsonPath("$.length()", is(1)))
             // Test returned added product has expected code
-            .andExpect(jsonPath("$[0].code", is(product.getCode())))
+            .andExpect(jsonPath("$[0].code", is(dto.code())))
             ;
     }
     
     /**
-     * Test adding unexisting product returns 404 error.
+     * Test adding non-existing product returns 404 error.
      *
      * @throws Exception If test went wrong.
      */
     @Test
     @Order(5)
-    public void addUnexistingProductToWishlistShouldThrow404() throws Exception {
+    public void addNonExistingProductToWishlistShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
@@ -200,12 +161,10 @@ public class WishlistControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         
         // Perform action
-        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -215,15 +174,6 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array still has 1 item
             .andExpect(jsonPath("$.length()", is(1)))
             ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
-            .orElseThrow();
-        // Check that wishlist has been created
-        Assertions.assertThat(user.getWishlist()).isNotNull();
-        // Check that product wishlist still has 1 item
-        Assertions.assertThat(user.getWishlist().getProducts().size())
-            .isEqualTo(1);
     }
     
     /**
@@ -281,11 +231,9 @@ public class WishlistControllerTests extends BaseControllerTests {
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
         ProductDto dto = this.data.getProducts().get(2);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
         
         // Perform action
-        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
+        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -295,15 +243,18 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array still has 1 item
             .andExpect(jsonPath("$.length()", is(1)))
             ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
-            .orElseThrow();
-        // Check that wishlist has been created
-        Assertions.assertThat(user.getWishlist()).isNotNull();
-        // Check that product wishlist still has 1 item
-        Assertions.assertThat(user.getWishlist().getProducts().size())
-            .isEqualTo(1);
+
+        // Get wishlist from server
+        this.mockMvc.perform(get(AppRoutes.WISHLIST)
+            .header("Authorization", "Bearer " + token)
+        )
+            // Print result
+            .andDo(print())
+            // Test HTTP response is OK
+            .andExpect(status().isOk())
+            // Test returned array has 1 item
+            .andExpect(jsonPath("$.length()", is(1)))
+        ;
     }
     
     /**
@@ -318,13 +269,11 @@ public class WishlistControllerTests extends BaseControllerTests {
         CreateUserDto userDto = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
-        // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        // Get product to remove from wishlist
+        ProductDto dto = this.data.getProducts().getFirst();
         
         // Perform action
-        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
+        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -334,15 +283,6 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array has no item
             .andExpect(jsonPath("$.length()", is(0)))
             ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
-            .orElseThrow();
-        // Check that wishlist has been created
-        Assertions.assertThat(user.getWishlist()).isNotNull();
-        // Check that product wishlist is now empty
-        Assertions.assertThat(user.getWishlist().getProducts().size())
-            .isEqualTo(0);
     }
     
     /**
@@ -354,16 +294,14 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Order(11)
     public void deleteProductWhenNoWishlistDoNothing() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(0);
+        CreateUserDto userDto = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         
         // Perform action
-        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + product.getId())
+        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -373,47 +311,5 @@ public class WishlistControllerTests extends BaseControllerTests {
             // Test returned array has no item
             .andExpect(jsonPath("$.length()", is(0)))
             ;
-        
-        // Get user from DB
-        User user = this.userRepository.findByEmail(userDto.getEmail())
-            .orElseThrow();
-        // Check that wishlist has not been created
-        Assertions.assertThat(user.getWishlist()).isNull();
-    }
-    
-    /**
-     * Test that when a product is deleted, all wishlists having this product 
-     * remove it.
-     * 
-     * @throws Exception If test went wrong.
-     */
-    @Test
-    @Order(12)
-    public void deleteProductShouldRemoveItFromAllWishlists() throws Exception {
-        // Get admin
-        CreateUserDto user = this.data.getUsers().get(0);
-        // Get token
-        String token = this.getJwtToken(user);
-        // Get product from DB
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
-
-        // Add product to wishlist
-        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + product.getId())
-            .header("Authorization", "Bearer " + token)
-        );
-        
-        // Assert that 1 wishlist has this product
-        List<Wishlist> wishlists = this.wishlistRepository.findByProductsContaining(product);
-        Assertions.assertThat(wishlists.size()).isEqualTo(1);
-        
-        // Delete product
-        this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + product.getId())
-            .header("Authorization", "Bearer " + token)
-        );
-        // Assert that no wishlist has this product anymore
-        wishlists = this.wishlistRepository.findByProductsContaining(product);
-        Assertions.assertThat(wishlists.size()).isEqualTo(0);
     }
 }

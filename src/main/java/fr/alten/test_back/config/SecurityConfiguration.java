@@ -1,10 +1,9 @@
 package fr.alten.test_back.config;
 
-import fr.alten.test_back.error.CustomAccessDeniedHandler;
-import fr.alten.test_back.error.CustomAuthenticationEntryPoint;
+import fr.alten.test_back.config.errorHandling.CustomAccessDeniedHandler;
+import fr.alten.test_back.config.errorHandling.CustomAuthenticationEntryPoint;
 import fr.alten.test_back.helper.AppRoutes;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -13,12 +12,15 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
  * App security configuration.
@@ -27,7 +29,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     /**
@@ -74,56 +76,56 @@ public class SecurityConfiguration {
      *
      * @param http Used security.
      * @return Generated security filter chain.
-     * @throws Exception
+     * @throws Exception If building security went wrong.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Disable CSRF because JWT is used
-        http.csrf(csrf -> csrf.disable())
-                // Configure routes authorization
-                .authorizeHttpRequests(auth -> auth
+        http.csrf(AbstractHttpConfigurer::disable)
+            // Configure routes authorization
+            .authorizeHttpRequests(auth -> auth
                 // Account creation & authentication -> allow all
                 .requestMatchers(
                         AppRoutes.CREATE_ACCOUNT,
                         AppRoutes.LOGIN
                 ).permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                // Genereated errors -> allow all
+                // Generated errors -> allow all
                 .requestMatchers("/error").permitAll()
                 // Other routes -> need authentication
                 .anyRequest().authenticated()
-                )
-                // Enable custom error handlinfs
-                .exceptionHandling(exception -> exception
+            )
+            // Enable custom error handling
+            .exceptionHandling(exception -> exception
                 // 401 Unauthorized
                 .authenticationEntryPoint(this.authenticationEntryPoint)
                 // 403 Forbidden
                 .accessDeniedHandler(this.accessDeniedHandler)
-                )
-                // Set authentication provider
-                .authenticationProvider(this.authenticationProvider)
-                // Configure stateless session
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Set logout page
-                .logout(logout
-                        -> // Define logout URL
-                        logout.logoutUrl(AppRoutes.LOGOUT)
-                        // Clear authentication context
-                        .clearAuthentication(true)
-                        // Invalidate session
-                        .invalidateHttpSession(true)
-                        // Remove session cookie
-                        .deleteCookies("JSESSIONID")
-                        // Disable logout redirection 
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            // Just send HTTP 200
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
-                        // Allow all to access logout page
-                        .permitAll()
-                )
-                // Add JWT filter
-                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            )
+            // Set authentication provider
+            .authenticationProvider(this.authenticationProvider)
+            // Configure stateless session
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Set logout page
+            .logout(logout
+                -> // Define logout URL
+                logout.logoutUrl(AppRoutes.LOGOUT)
+                // Clear authentication context
+                .clearAuthentication(true)
+                // Invalidate session
+                .invalidateHttpSession(true)
+                // Remove session cookie
+                .deleteCookies("JSESSIONID")
+                // Disable logout redirection
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    // Just send HTTP 200
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
+                // Allow all to access logout page
+                .permitAll()
+            )
+            // Add JWT filter
+            .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Build security rules
         return http.build();

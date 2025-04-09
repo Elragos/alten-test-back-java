@@ -1,4 +1,4 @@
-package fr.alten.test_back.error;
+package fr.alten.test_back.config.errorHandling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.helper.Translator;
@@ -33,8 +33,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         // Set error message
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("error", Translator.translate(
-            "error.auth.accessDenied.title",
-            null
+            "error.auth.accessDenied.title"
         ));
         errorDetails.put("message", authException.getMessage());
         errorDetails.put("path", request.getRequestURI());

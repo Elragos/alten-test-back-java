@@ -1,22 +1,17 @@
-package fr.alten.test_back.controller;
+package fr.alten.test_back.integration;
 
-import fr.alten.test_back.dto.AddProductToCartDto;
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
-import fr.alten.test_back.entity.Product;
+import fr.alten.test_back.dto.cart.AddProductToCartDto;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Translator;
-import fr.alten.test_back.repository.ProductRepository;
-import fr.alten.test_back.repository.UserRepository;
-import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,20 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author amarechal
  */
 public class CartControllerTests extends BaseControllerTests {
-      
-    /**
-     * Used product repository.
-     */
-    @Autowired
-    private ProductRepository productRepository;
-    
-    /**
-     * Used user repository.
-     */
-    @Autowired
-    private UserRepository userRepository;
-    
-
     /**
      * Test get cart failed when not logged in.
      *
@@ -94,7 +75,7 @@ public class CartControllerTests extends BaseControllerTests {
     public void addProductToCartShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
-        this.mockMvc.perform(post(AppRoutes.CART + "/1"))
+        this.mockMvc.perform(post(AppRoutes.CART))
             // Print result
             .andDo(print())
             // Test HTTP response is unauthorized
@@ -115,14 +96,12 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in cart
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set desired quantity
-        AddProductToCartDto payload = new AddProductToCartDto().setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
         // Perform action
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -134,29 +113,29 @@ public class CartControllerTests extends BaseControllerTests {
             // Test returned array has 1 item
             .andExpect(jsonPath("$.items.length()", is(1)))
             // Test returned added product has expected code
-            .andExpect(jsonPath("$.items[0].product.code", is(product.getCode())))
+            .andExpect(jsonPath("$.items[0].product.code", is(dto.code())))
             // Test cart quantity is as expected
-            .andExpect(jsonPath("$.items[0].quantity", is(payload.getQuantity())))
+            .andExpect(jsonPath("$.items[0].quantity", is(payload.quantity())))
             ;
     }
     
     /**
-     * Test adding unexisting product returns 404 error.
+     * Test adding non-existing product returns 404 error.
      *
      * @throws Exception If test went wrong.
      */
     @Test
     @Order(5)
-    public void addUnexistingProductToCartShouldThrow404() throws Exception {
+    public void addNonExistingProductToCartShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto().setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto("notExistingCode",1);
         // Perform action
-        this.mockMvc.perform(post(AppRoutes.CART + "/0")
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -183,20 +162,18 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto().setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
         // Perform add product twice with same session
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
             .session(session)
         );
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -209,7 +186,7 @@ public class CartControllerTests extends BaseControllerTests {
             // Test returned array has 1 item
             .andExpect(jsonPath("$.items.length()", is(1)))
             // Test returned added product has expected code
-            .andExpect(jsonPath("$.items[0].quantity", is(payload.getQuantity() * 2)))
+            .andExpect(jsonPath("$.items[0].quantity", is(payload.quantity() * 2)))
             ;
     }
     
@@ -226,15 +203,12 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto()
-            .setQuantity(product.getQuantity() + 1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), dto.quantity() + 1);
         
         // Perform add product
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -246,7 +220,7 @@ public class CartControllerTests extends BaseControllerTests {
             // Test returned array has 1 item
             .andExpect(jsonPath("$.items.length()", is(1)))
             // Test returned added product has expected code
-            .andExpect(jsonPath("$.items[0].quantity", is(product.getQuantity())))
+            .andExpect(jsonPath("$.items[0].quantity", is(dto.quantity())))
             ;
     }
     
@@ -267,15 +241,13 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto()
-            .setQuantity(product.getQuantity() + 1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), dto.quantity() + 1);
+
         
         // Perform add product
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -292,7 +264,7 @@ public class CartControllerTests extends BaseControllerTests {
             .andExpect(jsonPath("$.errors[0]", is(
                 Translator.translate(
                     "error.cart.notEnoughStock",
-                    new Object[]{ product.getName(), product.getQuantity()}
+                    new Object[]{ dto.code(), dto.quantity()}
                 )
             )))
             ;
@@ -327,15 +299,12 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto()
-            .setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
         // Perform add product
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -343,8 +312,8 @@ public class CartControllerTests extends BaseControllerTests {
             .session(session)
         );
         // Add the opposite quantity
-        payload.setQuantity(-payload.getQuantity());
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        payload = new AddProductToCartDto(dto.code(), -1);
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -363,7 +332,7 @@ public class CartControllerTests extends BaseControllerTests {
             .andExpect(jsonPath("$.errors[0]", is(
                 Translator.translate(
                     "error.cart.productRemoved",
-                    new Object[]{product.getName()}
+                    new Object[]{dto.code()}
                 )
             )))
             ;
@@ -438,15 +407,12 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product initially in cart
-        ProductDto initialDto = this.data.getProducts().get(0);
-        Product initialProduct = this.productRepository.findByCode(initialDto.getCode())
-            .orElseThrow();
+        ProductDto initialDto = this.data.getProducts().getFirst();
         // Set initial quantity
-        AddProductToCartDto payload = new AddProductToCartDto()
-            .setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto(initialDto.code(), 1);
         
         // Perform add product
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + initialProduct.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -456,11 +422,9 @@ public class CartControllerTests extends BaseControllerTests {
         
         // Get product we try to remove
         ProductDto testedDto = this.data.getProducts().get(2);
-        Product testedProduct = this.productRepository.findByCode(testedDto.getCode())
-            .orElseThrow();
-        
+
         // Perform action
-        this.mockMvc.perform(delete(AppRoutes.CART + "/" + testedProduct.getId())
+        this.mockMvc.perform(delete(AppRoutes.CART + "/" + testedDto.code())
             .header("Authorization", "Bearer " + token)
             .session(session)
         )
@@ -488,15 +452,12 @@ public class CartControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
         // Set adding quantity
-        AddProductToCartDto payload = new AddProductToCartDto()
-            .setQuantity(1);
+        AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
         // Perform add product
-        this.mockMvc.perform(post(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(post(AppRoutes.CART)
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(payload))
@@ -505,7 +466,7 @@ public class CartControllerTests extends BaseControllerTests {
         );
         
         // Perform delete product
-        this.mockMvc.perform(delete(AppRoutes.CART + "/" + product.getId())
+        this.mockMvc.perform(delete(AppRoutes.CART + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
             .session(session)
         )

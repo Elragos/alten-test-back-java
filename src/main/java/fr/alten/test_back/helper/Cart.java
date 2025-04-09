@@ -2,6 +2,7 @@ package fr.alten.test_back.helper;
 
 import fr.alten.test_back.entity.Product;
 import jakarta.servlet.http.HttpSession;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,7 +78,7 @@ public class Cart {
             // Indicate that product was remove because of invalid quantity
             this.errors.add(Translator.translate(
                 "error.cart.productRemoved",
-                new Object[]{product.getName()}
+                new Object[]{product.getCode()}
             ));
         }
         // If desired quantity above available quantity
@@ -88,7 +89,7 @@ public class Cart {
             this.errors.add(Translator.translate(
                 "error.cart.notEnoughStock",
                 new Object[]{
-                    product.getName(), product.getQuantity()
+                    product.getCode(), product.getQuantity()
                 }
             ));
         }
@@ -168,7 +169,7 @@ public class Cart {
     /**
      * Internal class representing a cart item
      */
-    public class CartItem {
+    public static class CartItem {
 
         /**
          * Item quantity.

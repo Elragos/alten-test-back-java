@@ -6,16 +6,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 /**
  * JWT token service.
@@ -119,9 +118,7 @@ public class JwtService {
                 // Generate token
                 .compact();
 
-        return new JwtToken()
-                .setValue(tokenValue)
-                .setExpirationDate(expirationDate);
+        return new JwtToken(tokenValue, expirationDate);
     }
 
     /**

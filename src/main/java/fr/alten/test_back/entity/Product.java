@@ -1,15 +1,12 @@
 package fr.alten.test_back.entity;
 
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.helper.ProductInventoryStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import java.util.Date;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.util.Date;
 
 /**
  * Entity representing an app product.
@@ -107,17 +104,17 @@ public class Product {
      * @param newProductData Product data.
      */
     public Product(ProductDto newProductData) {
-        this.code = newProductData.getCode();
-        this.name = newProductData.getName();
-        this.description = newProductData.getDescription();
-        this.image = newProductData.getImage();
-        this.category = newProductData.getCategory();
-        this.price = newProductData.getPrice();
-        this.quantity = newProductData.getQuantity();
-        this.internalReference = newProductData.getInternalReference();
-        this.shellId = newProductData.getShellId();
-        this.inventoryStatus = newProductData.getInventoryStatus();
-        this.rating = newProductData.getRating();
+        this.code = newProductData.code();
+        this.name = newProductData.name();
+        this.description = newProductData.description();
+        this.image = newProductData.image();
+        this.category = newProductData.category();
+        this.price = newProductData.price();
+        this.quantity = newProductData.quantity();
+        this.internalReference = newProductData.internalReference();
+        this.shellId = newProductData.shellId();
+        this.inventoryStatus = newProductData.inventoryStatus();
+        this.rating = newProductData.rating();
     }
 
     /**
@@ -408,48 +405,48 @@ public class Product {
      */
     public Product updateFromDto(ProductDto updateInfo) {
         // Set new category if DTO has one
-        if (updateInfo.getCategory() != null) {
-            this.setCategory(updateInfo.getCategory());
+        if (updateInfo.category() != null) {
+            this.setCategory(updateInfo.category());
         }
         // Set new code if DTO has one
-        if (updateInfo.getCode() != null) {
-            this.setCode(updateInfo.getCode());
+        if (updateInfo.code() != null) {
+            this.setCode(updateInfo.code());
         }
         // Set new description if DTO has one
-        if (updateInfo.getDescription() != null) {
-            this.setDescription(updateInfo.getDescription());
+        if (updateInfo.description() != null) {
+            this.setDescription(updateInfo.description());
         }
         // Set new image URL if DTO has one
-        if (updateInfo.getImage() != null) {
-            this.setImage(updateInfo.getImage());
+        if (updateInfo.image() != null) {
+            this.setImage(updateInfo.image());
         }
         // Set new internal reference if DTO has one
-        if (updateInfo.getInternalReference() != null) {
-            this.setInternalReference(updateInfo.getInternalReference());
+        if (updateInfo.internalReference() != null) {
+            this.setInternalReference(updateInfo.internalReference());
         }
         // Set new inventory status if DTO has one
-        if (updateInfo.getInventoryStatus() != null) {
-            this.setInventoryStatus(updateInfo.getInventoryStatus());
+        if (updateInfo.inventoryStatus() != null) {
+            this.setInventoryStatus(updateInfo.inventoryStatus());
         }
         // Set new name if DTO has one
-        if (updateInfo.getName() != null) {
-            this.setName(updateInfo.getName());
+        if (updateInfo.name() != null) {
+            this.setName(updateInfo.name());
         }
         // Set new price if DTO has one
-        if (updateInfo.getPrice() != null) {
-            this.setPrice(updateInfo.getPrice());
+        if (updateInfo.price() != null) {
+            this.setPrice(updateInfo.price());
         }
         // Set new quantity if DTO has one
-        if (updateInfo.getQuantity() != null) {
-            this.setQuantity(updateInfo.getQuantity());
+        if (updateInfo.quantity() != null) {
+            this.setQuantity(updateInfo.quantity());
         }
         // Set new rating if DTO has one
-        if (updateInfo.getRating() != null) {
-            this.setRating(updateInfo.getRating());
+        if (updateInfo.rating() != null) {
+            this.setRating(updateInfo.rating());
         }
         // Set new shell ID if DTO has one
-        if (updateInfo.getShellId() != null) {
-            this.setShellId(updateInfo.getShellId());
+        if (updateInfo.shellId() != null) {
+            this.setShellId(updateInfo.shellId());
         }
 
         // Set new update date.

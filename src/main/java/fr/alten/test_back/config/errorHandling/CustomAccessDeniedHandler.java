@@ -1,4 +1,4 @@
-package fr.alten.test_back.error;
+package fr.alten.test_back.config.errorHandling;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.helper.Translator;
@@ -33,12 +33,10 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         // Set error message
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("error", Translator.translate(
-            "error.auth.accessDenied.title",
-            null
+            "error.auth.accessDenied.title"
         ));
         errorDetails.put("message", Translator.translate(
-            "error.auth.accessDenied.message",
-            null
+            "error.auth.accessDenied.message"
         ));
         errorDetails.put("path", request.getRequestURI());
 

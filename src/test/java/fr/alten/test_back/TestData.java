@@ -3,8 +3,8 @@ package fr.alten.test_back;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.config.JsonPropertySourceFactory;
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.User;
@@ -12,13 +12,13 @@ import fr.alten.test_back.helper.JsonDataParser;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.RoleRepository;
 import fr.alten.test_back.repository.UserRepository;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Object loading initialData.json for testing.
@@ -35,33 +35,44 @@ public class TestData {
     /**
      * Used environment to load JSON file.
      */
-    @Autowired
-    private Environment env;
+    private final Environment env;
 
     /**
      * Used product repository.
      */
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
     
     /**
      * Used product repository.
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     
     /**
      * Used role repository.
      */
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
     
     /**
      * Used password encoder.
      */
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
+    private final PasswordEncoder passwordEncoder;
+
+    public TestData(
+            Environment env,
+            ProductRepository productRepository,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
+    ){
+
+        this.env = env;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
     /**
      * Loaded user list.
      */
@@ -75,7 +86,7 @@ public class TestData {
     /**
      * Load data from JSON file.
      *
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException If JSON is malformed.
      */
     public void loadData() throws JsonProcessingException {
         // Load JSON data
@@ -92,15 +103,15 @@ public class TestData {
         for (CreateUserDto userData : parser.getUsers()) {
             // Extract data from JSON
             User toAdd = new User()
-                .setEmail(userData.getEmail())
-                .setFirstname(userData.getFirstname())
-                .setUsername(userData.getUsername())
+                .setEmail(userData.email())
+                .setFirstname(userData.firstname())
+                .setUsername(userData.username())
                 .setPassword(this.passwordEncoder.encode(
-                        userData.getPassword()
+                        userData.password()
                 ))
                 .setRoles(List.of(this.roleRepository
-                    .findByRole(RoleEnum.valueOf(userData.getRole()))
-                    .get()
+                    .findByRole(RoleEnum.valueOf(userData.role()))
+                    .orElseThrow()
                 ));
 
             // Create user in DB if not exists

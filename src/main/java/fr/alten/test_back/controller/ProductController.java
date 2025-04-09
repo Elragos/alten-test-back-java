@@ -1,28 +1,16 @@
 package fr.alten.test_back.controller;
 
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.entity.Product;
-import fr.alten.test_back.entity.Wishlist;
-import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
-import fr.alten.test_back.helper.ProductHelper;
-import fr.alten.test_back.helper.Translator;
-import fr.alten.test_back.repository.ProductRepository;
-import fr.alten.test_back.repository.WishlistRepository;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import fr.alten.test_back.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Controller handling product interactions.
@@ -36,14 +24,11 @@ public class ProductController {
     /**
      * Used product repository.
      */
-    @Autowired
-    private ProductRepository productRepository;
-    
-    /**
-     * Used Wishlist repository.
-     */
-    @Autowired
-    private WishlistRepository wishlistRepository;
+    private final ProductService service;
+
+    public ProductController(ProductService service){
+        this.service = service;
+    }
 
     /**
      * List all available products.
@@ -52,20 +37,20 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<Iterable<Product>> listProducts() {
-        return ResponseEntity.ok(this.productRepository.findAll());
+        return ResponseEntity.ok(this.service.getAll());
     }
 
     /**
      * Get product info.
      *
-     * @param id Product DB ID.
+     * @param code Product code.
      * @return Product info, or 404 error if not found.
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable Integer id) {
+    @GetMapping("/{code}")
+    public ResponseEntity<ProductDto> getProduct(@PathVariable String code) {
         // Return product info.
         return ResponseEntity.ok(
-            ProductHelper.findProduct(id, this.productRepository)
+                ProductDto.generate(this.service.getByCode(code))
         );
     }
 
@@ -77,88 +62,50 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<URI> addProduct(@RequestBody ProductDto newProductData) {
-        // Try to find same product code
-        Optional<Product> existing = this.productRepository
-            .findByCode(newProductData.getCode());
-        // If found
-        if (existing.isPresent()){
-            // Send bad request error
-            throw new InvalidPayloadException(
-                Translator.translate(
-                    "error.product.codeAlreadyUsed", 
-                    new Object[]{newProductData.getCode()}
-                )
-            );
-        }
-        
-        // Else create new product from DTO
-        Product createdProduct = new Product(newProductData);
-        // Save created product to DB
-        createdProduct = this.productRepository.save(createdProduct);
+    public ResponseEntity<?> addProduct(
+            @RequestBody
+            ProductDto newProductData
+    ) {
+        // Create product
+        Product created = this.service.create(newProductData);
         // Return created product URL
         return ResponseEntity.created(
-            URI.create(AppRoutes.PRODUCT + "/" + createdProduct.getId())
+                URI.create(AppRoutes.PRODUCT + "/" + URLEncoder.encode(created.getCode(), StandardCharsets.UTF_8))
         ).build();
-        
     }
 
     /**
      * Update product to DB, only for admin users.
      *
-     * @param id Product DB ID to update.
+     * @param code Product code.
      * @param newProductData Product updated Info.
      * @return Updated product.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Integer id,
-            @RequestBody ProductDto newProductData) {
-        // Get product by sending product code
-        Optional<Product> collidingCode = this.productRepository
-            .findByCode(newProductData.getCode());
-        
-        // If found and not same product ID
-        if (collidingCode.isPresent() && !collidingCode.get().getId().equals(id)){
-            // Throw error
-            throw new InvalidPayloadException(Translator.translate(
-                "error.product.codeAlreadyUsed", 
-                new Object[]{ newProductData.getCode() }
-            ));
-        }        
-        
-        // Get product to update
-        Product update = ProductHelper.findProduct(id, this.productRepository);
-        // Update product info from DTO
-        update.updateFromDto(newProductData);
-        // Save updated product to DB
-        this.productRepository.save(update);
+    @PatchMapping("/{code}")
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable
+            String code,
+            @RequestBody
+            ProductDto newProductData
+    ) {
+        // Update product
+        Product updated = this.service.update(code, newProductData);
         // Return updated product
-        return ResponseEntity.ok(update);
+        return ResponseEntity.ok(updated);
     }
 
     /**
      * Remove product to DB, only for admin users.
      *
-     * @param id Product DB ID to update.
+     * @param code Product DB ID to update.
      * @return Deleted product.
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Product> removeProduct(@PathVariable Integer id) {
-        // Find product in DB
-        Product toRemove = ProductHelper.findProduct(id, this.productRepository);
-        // Remove it from all wishlists
-        List<Wishlist> wishlists = this.wishlistRepository
-            .findByProductsContaining(toRemove);
-        for (Wishlist current : wishlists){
-            current.removeProduct(toRemove);
-            this.wishlistRepository.save(current);
-        }
-        
-        // Remove product from DB
-        this.productRepository.delete(toRemove);
-        // Return deleted product info.
-        return ResponseEntity.ok(toRemove);
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Product> removeProduct(@PathVariable String code) {
+        Product deleted = this.service.delete(code);
+        // Return deleted product
+        return ResponseEntity.ok(deleted);
     }
 }

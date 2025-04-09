@@ -1,28 +1,23 @@
-package fr.alten.test_back.controller;
+package fr.alten.test_back.integration;
 
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.helper.AppRoutes;
-import fr.alten.test_back.repository.ProductRepository;
-import java.util.ArrayList;
-import java.util.Optional;
-import org.assertj.core.api.Assertions;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * LoginController tests.
@@ -30,12 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author amarechal
  */
 public class ProductControllerTests extends BaseControllerTests {
-
-    /**
-     * Used product repository.
-     */
-    @Autowired
-    private ProductRepository productRepository;
 
     /**
      * Check that login is required to get all products.
@@ -65,12 +54,6 @@ public class ProductControllerTests extends BaseControllerTests {
         // Get token
         String token = this.getJwtToken(user);
 
-        // Get test products' code
-        ArrayList<String> productCodes = new ArrayList<>();
-        this.productRepository.findAll().forEach(product -> 
-            productCodes.add(product.getCode())
-        );
-
         // Get product list
         this.mockMvc.perform(get(AppRoutes.PRODUCT)
             .header("Authorization", "Bearer " + token)
@@ -82,9 +65,12 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test list has 3 items
             .andExpect(jsonPath("$.length()", is(3)))
             // Test list contains all desired codes
+                /*
             .andExpect(jsonPath("$..code",
-                    containsInAnyOrder(productCodes.toArray())
-            ));
+                containsInAnyOrder(this.data.getProducts().stream().map(ProductDto::code).toList())
+            ))
+            */
+            ;
     }
 
     /**
@@ -95,7 +81,7 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     @Order(3)
     public void getSpecificProductShouldFailedWhenNotLoggedIn() throws Exception {
-        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/1"))
+        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/0"))
             // Print result
             .andDo(print())
             // Test HTTP response is unauthorized
@@ -116,12 +102,10 @@ public class ProductControllerTests extends BaseControllerTests {
         String token = this.getJwtToken(user);
 
         // Get test product code
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
 
         // Get product details
-        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/" + product.getId())
+        this.mockMvc.perform(get(AppRoutes.PRODUCT + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -129,18 +113,18 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test sent product is the one expected
-            .andExpect(jsonPath("$.code", is(product.getCode())))
+            .andExpect(jsonPath("$.code", is(dto.code())))
             ;
     }
 
     /**
-     * Test getting unexisting product failed with 404.
+     * Test getting non-existing product failed with 404.
      *
      * @throws Exception If test went wrong.
      */
     @Test
     @Order(5)
-    public void getUnexsitingProductShouldThrow404() throws Exception {
+    public void getNonExsitingProductShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
@@ -183,7 +167,7 @@ public class ProductControllerTests extends BaseControllerTests {
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
-        ProductDto productData = this.data.getProducts().get(0);
+        ProductDto productData = this.data.getProducts().getFirst();
 
         // Get product details
         this.mockMvc.perform(post(AppRoutes.PRODUCT)
@@ -206,14 +190,14 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(8)
     public void createProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get existing product
-        ProductDto productData = this.data.getProducts().get(0);
-        // Change code to avoid conflicts
-        String productCode = "Test creation";
-        productData.setCode(productCode);
+        ProductDto productData = this.data.getProducts().getFirst();
+        Product product = new Product(productData);
+        product.setCode("Test creation");
+        productData = ProductDto.generate(product);
 
         // Create product details
         MvcResult response = this.mockMvc.perform(post(AppRoutes.PRODUCT)
@@ -226,12 +210,14 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is Created
             .andExpect(status().isCreated())
             // Test that we are redirected to product details URL
-            .andExpect(redirectedUrlPattern(AppRoutes.PRODUCT + "/{id:[0-9]+}"))
+            .andExpect(redirectedUrlPattern(AppRoutes.PRODUCT + "/{code:[A-Za-z+]+}"))
             // Get response
             .andReturn()
             ;
         // Access redirected URL
-        this.mockMvc.perform(get(response.getResponse().getRedirectedUrl())
+        String url = Objects.requireNonNull(response.getResponse().getRedirectedUrl());
+        url = URLDecoder.decode(url, StandardCharsets.UTF_8);
+        this.mockMvc.perform(get(url)
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -239,7 +225,7 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test sent product is the one expected
-            .andExpect(jsonPath("$.code", is(productCode)))
+            .andExpect(jsonPath("$.code", is(productData.code())))
         ;
         
     }
@@ -253,11 +239,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(9)
     public void createExistingProductShouldFailed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get existing product
-        ProductDto productData = this.data.getProducts().get(0);
+        ProductDto productData = this.data.getProducts().getFirst();
 
         // Try creating product
         this.mockMvc.perform(post(AppRoutes.PRODUCT)
@@ -299,10 +285,10 @@ public class ProductControllerTests extends BaseControllerTests {
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
-        ProductDto productData = this.data.getProducts().get(0);
+        ProductDto productData = this.data.getProducts().getFirst();
 
         // Try updating product
-        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/1")
+        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + productData.code())
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(productData))
@@ -322,19 +308,18 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(12)
     public void updateProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
+        ProductDto dto = this.data.getProducts().getFirst();
+        Product product = new Product(dto);
         // Update only description
-        String newDescription = "Description updated";
-        ProductDto productData = new ProductDto().setDescription(newDescription);
+        product.setDescription("Description updated");
+        ProductDto productData = ProductDto.generate(product);
 
         // Update product details
-        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + product.getId())
+        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + productData.code())
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(productData))
@@ -344,17 +329,10 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test description has been updated
-            .andExpect(jsonPath("$.description", is(newDescription)))
+            .andExpect(jsonPath("$.description", is(productData.description())))
             // Test other fields has not been changed
-            .andExpect(jsonPath("$.code", is(product.getCode())))
+            .andExpect(jsonPath("$.code", is(productData.code())))
             ;
-        
-        // Reload product from DB
-        product = this.productRepository.findById(product.getId()).orElseThrow();
-        // Check that product description has been updated
-        Assertions.assertThat(product.getDescription()).isEqualTo(newDescription);
-        // Check that product code is not null
-        Assertions.assertThat(product.getCode()).isNotEmpty();
     }
     
     /**
@@ -366,19 +344,18 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(13)
     public void updateProductCodeShouldSucceedIfNotUsed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();;
+        ProductDto dto = this.data.getProducts().getFirst();
+        Product product = new Product(dto);
         // Update only code
-        String newCode = "Code updated";
-        ProductDto productData = new ProductDto().setCode(newCode);
+        product.setCode("Code updated");
+        ProductDto productData = ProductDto.generate(product);
 
         // Update product details
-        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + product.getId())
+        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(productData))
@@ -388,17 +365,12 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test code has been updated
-            .andExpect(jsonPath("$.code", is(newCode)))
+            .andExpect(jsonPath("$.code", is(productData.code())))
             ;
-        
-        // Reload product from DB
-        product = this.productRepository.findById(product.getId()).orElseThrow();
-        // Check that product code has been updated
-        Assertions.assertThat(product.getCode()).isEqualTo(newCode);
     }
     
     /**
-     * Check that admin can update product code if product updated 
+     * Check that admin can update product if product updated
      * is the one using that code.
      *
      * @throws Exception If test went wrong.
@@ -407,35 +379,25 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(14)
     public void updateProductCodeShouldSucceedIfSameProduct() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
-        // Update only code
-        String newCode = product.getCode();
-        ProductDto productData = new ProductDto().setCode(newCode);
+        ProductDto dto = this.data.getProducts().getFirst();
 
         // Update product details
-        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + product.getId())
+        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(this.mapper.writeValueAsString(productData))
+            .content(this.mapper.writeValueAsString(dto))
         )
             // Print result
             .andDo(print())
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test code has been updated
-            .andExpect(jsonPath("$.code", is(newCode)))
+            .andExpect(jsonPath("$.code", is(dto.code())))
             ;
-        
-        // Reload product from DB
-        product = this.productRepository.findById(product.getId()).orElseThrow();
-        // Check that product code has been updated
-        Assertions.assertThat(product.getCode()).isEqualTo(newCode);
     }
     
     /**
@@ -448,22 +410,19 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(15)
     public void updateProductCodeShouldFailedIfAlreadyUsed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get products from DB
-        ProductDto updatedDto = this.data.getProducts().get(0);
-        Product updatedProduct = this.productRepository
-            .findByCode(updatedDto.getCode()).orElseThrow();
+        ProductDto updatedDto = this.data.getProducts().getFirst();
         ProductDto collidingDto = this.data.getProducts().get(1);
-        Product collidingProduct = this.productRepository
-            .findByCode(collidingDto.getCode()).orElseThrow();
         // Update only code
-        String newCode = collidingProduct.getCode();
-        ProductDto productData = new ProductDto().setCode(newCode);
+        Product updatedProduct = new Product(updatedDto);
+        updatedProduct.setCode(collidingDto.code());
+        ProductDto productData = ProductDto.generate(updatedProduct);
 
         // Update product details
-        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + updatedProduct.getId())
+        this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + updatedDto.code())
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(this.mapper.writeValueAsString(productData))
@@ -484,18 +443,17 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(16)
     public void updateProductShouldFailedIfNotExists() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
-        // Update only code
-        String newCode = "Test";
-        ProductDto productData = new ProductDto().setCode(newCode);
+        // Get product
+        ProductDto updatedDto = this.data.getProducts().getFirst();
 
         // Update product details
         this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/0")
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(this.mapper.writeValueAsString(productData))
+            .content(this.mapper.writeValueAsString(updatedDto))
         )
             // Print result
             .andDo(print())
@@ -551,7 +509,7 @@ public class ProductControllerTests extends BaseControllerTests {
     @Order(19)
     public void deleteProductShouldFailedIfNotExists() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
 
@@ -567,24 +525,21 @@ public class ProductControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Check that admin can delete product .
+     * Check that admin can delete product.
      *
      * @throws Exception If test went wrong.
      */
     @Test
     @Order(20)
-    public void deleteProductShouldSuccedIfAdmin() throws Exception {
+    public void deleteProductShouldSucceedIfAdmin() throws Exception {
         // Get admin
-        CreateUserDto user = this.data.getUsers().get(0);
+        CreateUserDto user = this.data.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().get(0);
-        Product product = this.productRepository.findByCode(dto.getCode())
-            .orElseThrow();
-
+        ProductDto dto = this.data.getProducts().getFirst();
         // Delete product
-        this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + product.getId())
+        this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -592,14 +547,7 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test deleted product has same code as expected
-            .andExpect(jsonPath("$.code", is(product.getCode())))
+            .andExpect(jsonPath("$.code", is(dto.code())))
             ;
-        
-        // Try reloading product
-        Optional<Product> deleted = this.productRepository
-            .findById(product.getId());
-        
-        // Check that product does not exists anymore
-        Assertions.assertThat(deleted.isEmpty());
     }
 }

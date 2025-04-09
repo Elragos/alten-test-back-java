@@ -1,25 +1,14 @@
 package fr.alten.test_back.controller;
 
-import fr.alten.test_back.dto.AddProductToCartDto;
+import fr.alten.test_back.dto.cart.AddProductToCartDto;
 import fr.alten.test_back.entity.Product;
-import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Cart;
-import fr.alten.test_back.helper.ProductHelper;
-import fr.alten.test_back.helper.Translator;
-import fr.alten.test_back.repository.ProductRepository;
+import fr.alten.test_back.service.ProductService;
 import jakarta.servlet.http.HttpSession;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Controller handling user cart interactions.
@@ -31,10 +20,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CartController {
 
     /**
-     * Used product repository.
+     * Used product service.
      */
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductService service;
+
+    /**
+     * Initialize service.
+     * @param service Used product service
+     */
+    public CartController(ProductService service) {
+        this.service = service;
+    }
 
     /**
      * Get user cart items.
@@ -51,30 +47,34 @@ public class CartController {
      * Add product to user cart. Required payload : { "quantity": integer }
      *
      * @param session User session.
-     * @param id Product DB ID to add.
      * @param payload Payload.
      * @return Updated cart item list.
      */
-    @PostMapping("/{id}")
+    @PostMapping
     public ResponseEntity<Cart> addProduct(
             HttpSession session,
-            @RequestBody AddProductToCartDto payload,
-            @PathVariable int id
+            @RequestBody AddProductToCartDto payload
     ) {
         Cart cart = Cart.getSessionCart(session);
-        Product toAdd = ProductHelper.findProduct(id, this.productRepository);
-        cart.addItem(payload.getQuantity(), toAdd);
+        Product toAdd = this.service.getByCode(payload.productCode());
+        cart.addItem(payload.quantity(), toAdd);
         cart.saveInSession(session);
         return ResponseEntity.ok(cart);
     }
 
-    @DeleteMapping("/{id}")
+    /**
+     * Delete product from cart.
+     * @param session User http session.
+     * @param code Desired product code.
+     * @return Updated cart.
+     */
+    @DeleteMapping("/{code}")
     public ResponseEntity<Cart> removeProduct(
             HttpSession session,
-            @PathVariable int id
+            @PathVariable String code
     ) {
         Cart cart = Cart.getSessionCart(session);
-        Product toRemove = ProductHelper.findProduct(id, this.productRepository);
+        Product toRemove = this.service.getByCode(code);
         cart.removeItem(toRemove);
         cart.saveInSession(session);
         return ResponseEntity.ok(cart);

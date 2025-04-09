@@ -3,8 +3,9 @@ package fr.alten.test_back.helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
+
 import java.util.List;
 
 /**
@@ -36,7 +37,7 @@ public class JsonDataParser {
             String usersJson = mapper.writeValueAsString(usersObj);
             // Read user list from file
             this.users = mapper.readValue(usersJson,
-                new TypeReference<List<CreateUserDto>>() {
+                new TypeReference<>() {
             });
         }
 
@@ -46,7 +47,7 @@ public class JsonDataParser {
             String productsJson = mapper.writeValueAsString(productsObj);
             // Read user list from file
             this.products = mapper.readValue(productsJson,
-                new TypeReference<List<ProductDto>>() {
+                new TypeReference<>() {
             });
         }
     }

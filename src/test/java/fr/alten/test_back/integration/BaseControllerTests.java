@@ -1,14 +1,13 @@
-package fr.alten.test_back.controller;
+package fr.alten.test_back.integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.TestContainersConfiguration;
 import fr.alten.test_back.TestData;
-import fr.alten.test_back.dto.LoginUserDto;
-import fr.alten.test_back.dto.RegisterUserDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
+import fr.alten.test_back.dto.user.LoginUserDto;
 import fr.alten.test_back.helper.AppRoutes;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -19,6 +18,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Map;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
@@ -68,22 +70,20 @@ public class BaseControllerTests {
      * @return JWT token
      * @throws Exception If login went wrong.
      */
-    public String getJwtToken(RegisterUserDto user) throws Exception {
-        LoginUserDto loginData = new LoginUserDto()
-            .setEmail(user.getEmail())
-            .setPassword(user.getPassword());
-        // Peform login request and get response
+    public String getJwtToken(CreateUserDto user) throws Exception {
+        LoginUserDto loginData = new LoginUserDto(user.email(), user.password());
+        // Perform login request and get response
         MvcResult loginResponse = this.mockMvc.perform(
             post(AppRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(loginData))
         ).andReturn();
         // Parse response
-        Map loginResponseData = this.mapper.readValue(
+        Map<String, Object> loginResponseData = this.mapper.readValue(
             loginResponse.getResponse().getContentAsString(),
-            new TypeReference<Map<String, Object>>() {}
+            new TypeReference<>() {}
         );
 
-        return loginResponseData.get("token").toString();
+        return loginResponseData.get("value").toString();
     }
 
 }

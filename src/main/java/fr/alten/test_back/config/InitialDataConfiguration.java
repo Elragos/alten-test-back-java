@@ -2,24 +2,24 @@ package fr.alten.test_back.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.ProductDto;
+import fr.alten.test_back.dto.product.ProductDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
+import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.Role;
 import fr.alten.test_back.entity.RoleEnum;
-import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.entity.User;
 import fr.alten.test_back.helper.JsonDataParser;
 import fr.alten.test_back.repository.ProductRepository;
+import fr.alten.test_back.repository.RoleRepository;
 import fr.alten.test_back.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import fr.alten.test_back.repository.RoleRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Initial data configuration. This ensures that all authorities are registered
@@ -34,32 +34,45 @@ import fr.alten.test_back.repository.RoleRepository;
 )
 public class InitialDataConfiguration {
 
-    @Autowired
-    private Environment env;
+    /**
+     * Used environment.
+     */
+    private final Environment env;
 
     /**
      * Used user repository.
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * Used role repository.
      */
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     /**
      * Used password encoder.
      */
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Used product repository.
      */
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+
+    public InitialDataConfiguration(
+            Environment env,
+            ProductRepository productRepository,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder
+    ){
+
+        this.env = env;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Generate initial data after application contruction.
@@ -113,15 +126,15 @@ public class InitialDataConfiguration {
         for (CreateUserDto userData : parser.getUsers()) {
             // Extract data from JSON
             User toAdd = new User()
-                .setEmail(userData.getEmail())
-                .setFirstname(userData.getFirstname())
-                .setUsername(userData.getUsername())
+                .setEmail(userData.email())
+                .setFirstname(userData.firstname())
+                .setUsername(userData.username())
                 .setPassword(this.passwordEncoder.encode(
-                        userData.getPassword()
+                        userData.password()
                 ))
                 .setRoles(List.of(this.roleRepository
-                    .findByRole(RoleEnum.valueOf(userData.getRole()))
-                    .get()
+                    .findByRole(RoleEnum.valueOf(userData.role()))
+                    .orElseThrow()
                 ));
 
             // Create user in DB if not exists
@@ -161,7 +174,7 @@ public class InitialDataConfiguration {
             .setFirstname("admin")
             .setPassword(this.passwordEncoder.encode("123456"))
             .setRoles(List.of(this.roleRepository
-                .findByRole(RoleEnum.ROLE_ADMIN).get()
+                .findByRole(RoleEnum.ROLE_ADMIN).orElseThrow()
             ));
         this.createAccount(admin);
     }

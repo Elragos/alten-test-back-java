@@ -1,22 +1,23 @@
 package fr.alten.test_back.service;
 
-import fr.alten.test_back.dto.LoginUserDto;
-import fr.alten.test_back.dto.RegisterUserDto;
+import fr.alten.test_back.dto.user.LoginUserDto;
+import fr.alten.test_back.dto.user.RegisterUserDto;
 import fr.alten.test_back.entity.Role;
 import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.entity.User;
-import fr.alten.test_back.error.InvalidPayloadException;
 import fr.alten.test_back.helper.Translator;
+import fr.alten.test_back.repository.RoleRepository;
 import fr.alten.test_back.repository.UserRepository;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import fr.alten.test_back.repository.RoleRepository;
+
+import java.security.InvalidParameterException;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Application authentication service.
@@ -75,22 +76,22 @@ public class AuthenticationService {
      */
     public User signup(RegisterUserDto input) throws ResponseStatusException {
         // Test if user email already exists in DB
-        Optional<User> exisiting = this.userRepository.findByEmail(input.getEmail());
+        Optional<User> exisiting = this.userRepository.findByEmail(input.email());
         // If found
         if (exisiting.isPresent()) {
             // Throw error
-            throw new InvalidPayloadException(Translator.translate(
+            throw new InvalidParameterException(Translator.translate(
                     "error.auth.emailAlreadyExists",
-                    new Object[]{input.getEmail()}
+                    new Object[]{input.email()}
             ));
         }
 
         // Else create user
         User user = new User()
-                .setUsername(input.getUsername())
-                .setFirstname(input.getFirstname())
-                .setEmail(input.getEmail())
-                .setPassword(this.passwordEncoder.encode(input.getPassword()))
+                .setUsername(input.username())
+                .setFirstname(input.firstname())
+                .setEmail(input.email())
+                .setPassword(this.passwordEncoder.encode(input.password()))
                 // Set user role by default
                 .setRoles(List.of(getUserRole()));
 
@@ -103,20 +104,20 @@ public class AuthenticationService {
      * @param input User authentication info.
      * @return Found user.
      * @throws AuthenticationException If authentication failed.
-     * @throws InvalidPayloadException If user not found.
+     * @throws InvalidParameterException If user not found.
      */
     public User authenticate(LoginUserDto input)
             throws AuthenticationException, ResponseStatusException {
         this.authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
-                        input.getPassword()
-                )
+            new UsernamePasswordAuthenticationToken(
+                input.email(),
+                input.password()
+            )
         );
 
-        return userRepository.findByEmail(input.getEmail())
-            .orElseThrow(() -> new InvalidPayloadException(Translator.translate(
-                "error.auth.failed", null
+        return this.userRepository.findByEmail(input.email())
+            .orElseThrow(() -> new InvalidParameterException(Translator.translate(
+                "error.auth.failed"
             )));
     }
 
@@ -126,6 +127,6 @@ public class AuthenticationService {
      * @return User role.
      */
     private Role getUserRole() {
-        return this.roleRepository.findByRole(RoleEnum.ROLE_USER).get();
+        return this.roleRepository.findByRole(RoleEnum.ROLE_USER).orElseThrow();
     }
 }

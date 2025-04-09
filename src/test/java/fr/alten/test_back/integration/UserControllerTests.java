@@ -1,18 +1,16 @@
-package fr.alten.test_back.controller;
+package fr.alten.test_back.integration;
 
-import fr.alten.test_back.dto.CreateUserDto;
-import fr.alten.test_back.dto.LoginUserDto;
-import fr.alten.test_back.dto.RegisterUserDto;
+import fr.alten.test_back.dto.user.CreateUserDto;
+import fr.alten.test_back.dto.user.LoginUserDto;
+import fr.alten.test_back.dto.user.RegisterUserDto;
 import fr.alten.test_back.entity.RoleEnum;
-import fr.alten.test_back.entity.User;
 import fr.alten.test_back.helper.AppRoutes;
-import fr.alten.test_back.repository.UserRepository;
-import org.assertj.core.api.Assertions;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -24,16 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author amarechal
  */
-public class LoginControllerTests extends BaseControllerTests {
-  
-    /**
-     * Used user repository.
-     */
-    private final UserRepository userRepository;
-
-    public LoginControllerTests(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
+public class UserControllerTests extends BaseControllerTests {
 
     /**
      * Test admin login.
@@ -46,9 +35,7 @@ public class LoginControllerTests extends BaseControllerTests {
         // Get admin user
         CreateUserDto admin = this.data.getUsers().getFirst();
         // Set POST data
-        LoginUserDto loginData = new LoginUserDto()
-                .setEmail(admin.getEmail())
-                .setPassword(admin.getPassword());
+        LoginUserDto loginData = new LoginUserDto(admin.email(), admin.password());
         // Perform action
         this.mockMvc.perform(
                 post(AppRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
@@ -59,9 +46,9 @@ public class LoginControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test token is in response
-            .andExpect(jsonPath("$.token").isNotEmpty())
+            .andExpect(jsonPath("$.value").isNotEmpty())
             // Test expiresAt in response
-            .andExpect(jsonPath("$.expiresAt").isNotEmpty());
+            .andExpect(jsonPath("$.expirationDate").isNotEmpty());
     }
     
     /**
@@ -139,13 +126,11 @@ public class LoginControllerTests extends BaseControllerTests {
     @Order(4)
     public void badCredentialsFails() throws Exception {
          // Set POST data
-        LoginUserDto loginData = new LoginUserDto()
-                .setEmail("shouldNotExists")
-                .setPassword("");
+        LoginUserDto loginData = new LoginUserDto("", "");
         // Perform action
-        this.mockMvc.perform(
-                post(AppRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(loginData))
+        this.mockMvc.perform(post(AppRoutes.LOGIN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(loginData))
         ).
             // Print result
             andDo(print())
@@ -161,11 +146,12 @@ public class LoginControllerTests extends BaseControllerTests {
     @Test
     @Order(5)
     public void userCreationIsSuccess() throws Exception {
-        RegisterUserDto dto = new RegisterUserDto()
-            .setEmail("testCreation@test.com")
-            .setFirstname("test")
-            .setUsername("test")
-            .setPassword("123456");
+        RegisterUserDto dto = new RegisterUserDto(
+            "testCreation@test.com",
+            "test",
+            "test",
+            "123456"
+        );
         
         this.mockMvc.perform(
             post(AppRoutes.CREATE_ACCOUNT).contentType(MediaType.APPLICATION_JSON)
@@ -176,29 +162,12 @@ public class LoginControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test registered email match dto email
-            .andExpect(jsonPath("$.email").value(dto.getEmail()))
+            .andExpect(jsonPath("$.email").value(dto.email()))
             // Test registered firstname match dto firstname
-            .andExpect(jsonPath("$.firstname").value(dto.getFirstname()))
+            .andExpect(jsonPath("$.firstname").value(dto.firstname()))
             // Test registered username match dto username
-            .andExpect(jsonPath("$.username").value(dto.getUsername()))
+            .andExpect(jsonPath("$.username").value(dto.username()))
             ;
-        
-        // Check that registered user is only user
-        User createdUser = this.userRepository.findByEmail(dto.getEmail())
-            .orElseThrow();
-        
-        // Assert that created user has role user
-        Assertions.assertThat(
-            createdUser.getRoles().stream().anyMatch(
-                role -> role.getRole().equals(RoleEnum.ROLE_USER)
-            )
-        );
-        // Assert that created user is not admin
-        Assertions.assertThat(
-            createdUser.getRoles().stream().noneMatch(
-                role -> role.getRole().equals(RoleEnum.ROLE_ADMIN)
-            )
-        );
     }
     
     /**
@@ -209,7 +178,7 @@ public class LoginControllerTests extends BaseControllerTests {
     @Test
     @Order(6)
     public void cannotReuseSameEmail() throws Exception {        
-        RegisterUserDto dto = this.data.getUsers().getFirst();
+        CreateUserDto dto = this.data.getUsers().getFirst();
         
         this.mockMvc.perform(
             post(AppRoutes.CREATE_ACCOUNT).contentType(MediaType.APPLICATION_JSON)

@@ -1,11 +1,12 @@
 package fr.alten.test_back;
 
 import com.zaxxer.hikari.HikariDataSource;
-import java.time.Duration;
-import javax.sql.DataSource;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.MySQLContainer;
+
+import javax.sql.DataSource;
+import java.time.Duration;
 
 /**
  * Test configuration database.
