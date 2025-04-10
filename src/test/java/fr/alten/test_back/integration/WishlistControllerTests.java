@@ -314,4 +314,56 @@ public class WishlistControllerTests extends BaseControllerTests {
             .andExpect(jsonPath("$.length()", is(0)))
             ;
     }
+
+    /**
+     * Test that deleting a product from DB removes it from all wishlists.
+     * @throws Exception If something went wrong.
+     */
+    @Test
+    public void deleteProductRemovesItFromAllWishlists() throws Exception {
+        // Get users
+        CreateUserDto adminDto = this.data.getUsers().getFirst();
+        CreateUserDto userDto = this.data.getUsers().getLast();
+        // Get test product
+        ProductDto productDto = this.data.getProducts().getFirst();
+
+        // Get JWT tokens
+        String adminToken = this.getJwtToken(adminDto);
+        String userToken = this.getJwtToken(userDto);
+
+        // Add product to admin wishlist
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + productDto.code())
+            .header("Authorization", "Bearer " + adminToken)
+        );
+        // Add product to user wishlist
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + productDto.code())
+            .header("Authorization", "Bearer " + userToken)
+        );
+        // Delete product
+        this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + productDto.code())
+            .header("Authorization", "Bearer " + adminToken)
+        );
+        // Get admin wishlist from server
+        this.mockMvc.perform(get(AppRoutes.WISHLIST)
+            .header("Authorization", "Bearer " + adminToken)
+        )
+            // Print result
+            .andDo(print())
+            // Test HTTP response is OK
+            .andExpect(status().isOk())
+            // Test returned array has no item
+            .andExpect(jsonPath("$.length()", is(0)))
+        ;
+        // Get user wishlist from server
+        this.mockMvc.perform(get(AppRoutes.WISHLIST)
+            .header("Authorization", "Bearer " + userToken)
+        )
+            // Print result
+            .andDo(print())
+            // Test HTTP response is OK
+            .andExpect(status().isOk())
+            // Test returned array has no item
+            .andExpect(jsonPath("$.length()", is(0)))
+        ;
+    }
 }
