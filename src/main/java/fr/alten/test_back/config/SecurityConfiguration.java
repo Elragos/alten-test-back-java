@@ -3,24 +3,25 @@ package fr.alten.test_back.config;
 import fr.alten.test_back.config.errorHandling.CustomAccessDeniedHandler;
 import fr.alten.test_back.config.errorHandling.CustomAuthenticationEntryPoint;
 import fr.alten.test_back.helper.AppRoutes;
+import fr.alten.test_back.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 /**
  * App security configuration.
@@ -32,10 +33,6 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    /**
-     * Used authentication provider.
-     */
-    private final AuthenticationProvider authenticationProvider;
     /**
      * Used JWT authentication filter.
      */
@@ -53,7 +50,6 @@ public class SecurityConfiguration {
      * Initialize configuration.
      *
      * @param jwtAuthenticationFilter Used JWT authentication filter.
-     * @param authenticationProvider Used authentication provider.
      * @param authenticationEntryPoint Used custom authentication entry point
      * (for 401 errors).
      * @param accessDeniedHandler Used custom access denied handler (for 403
@@ -61,11 +57,9 @@ public class SecurityConfiguration {
      */
     public SecurityConfiguration(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider,
             CustomAuthenticationEntryPoint authenticationEntryPoint,
             CustomAccessDeniedHandler accessDeniedHandler
     ) {
-        this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
@@ -103,7 +97,7 @@ public class SecurityConfiguration {
                 .accessDeniedHandler(this.accessDeniedHandler)
             )
             // Set authentication provider
-            .authenticationProvider(this.authenticationProvider)
+            .authenticationProvider(authenticationProvider(null, null))
             // Configure stateless session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // Set logout page
@@ -132,33 +126,6 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Define CORS configuration source
-     *
-     * @return CORS configuration source.
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Define authorized HTTP methods
-        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
-        // Define authorized headers
-        configuration.setAllowedHeaders(List.of(
-                // Bearer token
-                "Authorization",
-                // Locale to use
-                "Accept-Language",
-                // Content type (to communicate in JSON)
-                "Content-Type"
-        ));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
-
-    /**
      * Define application role hierarchy.
      *
      * @return Defined hierarchy.
@@ -170,4 +137,42 @@ public class SecurityConfiguration {
                 .role("USER").implies("GUEST")
                 .build();
     }
+
+    /**
+     * Define authentication manager.
+     *
+     * @param config Used authentication configuration.
+     * @return Used authentication manager.
+     * @throws Exception If something went wrong
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    /**
+     * Define authentication provider.
+     *
+     * @param userDetailsService Used user details service.
+     * @param passwordEncoder Used password encoder.
+     * @return Authentication provider.
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider(
+            CustomUserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder
+    ) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
+
