@@ -5,7 +5,6 @@ import fr.alten.test_back.dto.user.LoginUserDto;
 import fr.alten.test_back.dto.user.RegisterUserDto;
 import fr.alten.test_back.entity.RoleEnum;
 import fr.alten.test_back.helper.AppRoutes;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -30,7 +29,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(1)
     public void adminLoginShouldSucceed() throws Exception {
         // Get admin user
         CreateUserDto admin = this.data.getUsers().getFirst();
@@ -57,7 +55,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(2)
     public void adminLoggingAsAdmin() throws Exception {
         // Get admin user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -86,7 +83,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(3)
     public void userLoggingAsUser() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -123,7 +119,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(4)
     public void badCredentialsFails() throws Exception {
          // Set POST data
         LoginUserDto loginData = new LoginUserDto("", "");
@@ -144,7 +139,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(5)
     public void userCreationIsSuccess() throws Exception {
         RegisterUserDto dto = new RegisterUserDto(
             "testCreation@test.com",
@@ -176,7 +170,6 @@ public class UserControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(6)
     public void cannotReuseSameEmail() throws Exception {        
         CreateUserDto dto = this.data.getUsers().getFirst();
         

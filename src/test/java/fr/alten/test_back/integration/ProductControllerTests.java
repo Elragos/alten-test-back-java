@@ -4,7 +4,6 @@ import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.helper.AppRoutes;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -32,7 +31,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(1)
     public void getAllProductsShouldFailedWhenNotLoggedIn() throws Exception {
         this.mockMvc.perform(get(AppRoutes.PRODUCT))
             // Print result
@@ -47,7 +45,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(2)
     public void getAllProductsShouldSucceedWith3Products() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -65,7 +62,7 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test list has 3 items
             .andExpect(jsonPath("$.length()", is(3)))
             // Test list contains all desired codes
-                /*
+            /*
             .andExpect(jsonPath("$..code",
                 containsInAnyOrder(this.data.getProducts().stream().map(ProductDto::code).toList())
             ))
@@ -79,7 +76,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(3)
     public void getSpecificProductShouldFailedWhenNotLoggedIn() throws Exception {
         this.mockMvc.perform(get(AppRoutes.PRODUCT + "/0"))
             // Print result
@@ -94,7 +90,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(4)
     public void getSpecificProductShouldSucceed() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -123,7 +118,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(5)
     public void getNonExsitingProductShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -146,7 +140,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(6)
     public void createProductShouldFailedWhenNotLoggedIn() throws Exception {
         this.mockMvc.perform(post(AppRoutes.PRODUCT))
             // Print result
@@ -161,7 +154,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(7)
     public void createProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -187,7 +179,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(8)
     public void createProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -236,7 +227,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(9)
     public void createExistingProductShouldFailed() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -264,7 +254,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(10)
     public void updateProductShouldFailedWhenNotLoggedIn() throws Exception {
         this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/1"))
             // Print result
@@ -279,7 +268,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(11)
     public void updateProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -305,7 +293,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(12)
     public void updateProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -341,7 +328,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(13)
     public void updateProductCodeShouldSucceedIfNotUsed() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -376,7 +362,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(14)
     public void updateProductCodeShouldSucceedIfSameProduct() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -407,7 +392,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(15)
     public void updateProductCodeShouldFailedIfAlreadyUsed() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -435,12 +419,11 @@ public class ProductControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Check that admin cannot update product if product id does not exists.
+     * Check that admin cannot update product if product code does not exist.
      *
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(16)
     public void updateProductShouldFailedIfNotExists() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -468,7 +451,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(17)
     public void deleteProductShouldFailedWhenNotLoggedIn() throws Exception {
         this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/1"))
             // Print result
@@ -483,7 +465,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(18)
     public void deleteProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -506,7 +487,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(19)
     public void deleteProductShouldFailedIfNotExists() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().getFirst();
@@ -530,7 +510,6 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(20)
     public void deleteProductShouldSucceedIfAdmin() throws Exception {
         // Get admin
         CreateUserDto user = this.data.getUsers().getFirst();

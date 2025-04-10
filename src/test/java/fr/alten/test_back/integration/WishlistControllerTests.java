@@ -4,7 +4,6 @@ import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.helper.AppRoutes;
 
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.is;
@@ -26,7 +25,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(1)
     public void getWishlistShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -44,7 +42,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(2)
     public void getReturnedWishlistIsEmptyWhenNotCreatedYet() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -69,7 +66,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(3)
     public void addProductToWishlistShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -87,7 +83,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(4)
     public void addProductToWishlistShouldSucceed() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
@@ -131,7 +126,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(5)
     public void addNonExistingProductToWishlistShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -154,7 +148,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(6)
     public void addProductAlreadyInWishlistDoNothing() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
@@ -163,9 +156,12 @@ public class WishlistControllerTests extends BaseControllerTests {
         // Get product to add in wishlist
         ProductDto dto = this.data.getProducts().getFirst();
         
-        // Perform action
+        // Perform action twice
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
+        );
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
+                .header("Authorization", "Bearer " + token)
         )
             // Print result
             .andDo(print())
@@ -182,7 +178,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(7)
     public void deleteProductFromWishlistShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -195,13 +190,12 @@ public class WishlistControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Test delete unexisting product from wishlist throw 404 error.
+     * Test delete non-existing product from wishlist throw 404 error.
      *
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(8)
-    public void deleteUnexistingProductFromWishlistShouldThrow404() throws Exception {
+    public void deleteNonExistingProductFromWishlistShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
@@ -223,17 +217,21 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(9)
     public void deleteProductNotInWishlistDoNothing() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
-        // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().get(2);
-        
-        // Perform action
-        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
+        // Get products
+        ProductDto addedDto = this.data.getProducts().getFirst();
+        ProductDto deletedDto = this.data.getProducts().getLast();
+
+        // Add first product to wishlist
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + addedDto.code())
+            .header("Authorization", "Bearer " + token)
+        );
+        // Delete second product from wishlist
+        this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + deletedDto.code())
             .header("Authorization", "Bearer " + token)
         )
             // Print result
@@ -254,6 +252,8 @@ public class WishlistControllerTests extends BaseControllerTests {
             .andExpect(status().isOk())
             // Test returned array has 1 item
             .andExpect(jsonPath("$.length()", is(1)))
+            // Test returned product code matches the one expected
+            .andExpect(jsonPath("$[0].code", is(addedDto.code())))
         ;
     }
     
@@ -263,7 +263,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(10)
     public void deleteProductInWishlistSucceed() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
@@ -271,7 +270,11 @@ public class WishlistControllerTests extends BaseControllerTests {
         String token = this.getJwtToken(userDto);
         // Get product to remove from wishlist
         ProductDto dto = this.data.getProducts().getFirst();
-        
+
+        // Add product to wishlist
+        this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
+            .header("Authorization", "Bearer " + token)
+        );
         // Perform action
         this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
             .header("Authorization", "Bearer " + token)
@@ -291,7 +294,6 @@ public class WishlistControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(11)
     public void deleteProductWhenNoWishlistDoNothing() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().getFirst();

@@ -5,7 +5,6 @@ import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Translator;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -28,7 +27,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(1)
     public void getCartShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -46,7 +44,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(2)
     public void getCartIsEmptyWhenSessionInitialized() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -71,7 +68,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(3)
     public void addProductToCartShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -89,7 +85,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(4)
     public void addProductToCartShouldSucceed() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
@@ -125,7 +120,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(5)
     public void addNonExistingProductToCartShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
@@ -153,7 +147,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(6)
     public void addProductAlreadyInCartAddQuantity() throws Exception {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
@@ -196,7 +189,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(7)
     public void addMoreThanProductStockLimitsItToStock() throws Exception {
         // Get user
         CreateUserDto userDto = this.data.getUsers().get(1);
@@ -231,7 +223,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(8)
     public void addMoreThanProductStockGeneratesErrorAndErrorIsResetNextCall() 
         throws Exception {
         // Create empty session
@@ -289,7 +280,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(9)
     public void zeroQuantityInCartRemovesProductAndGeneratesError() 
         throws Exception {
         // Create empty session
@@ -356,7 +346,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(10)
     public void deleteProductFromCartShouldFailedWhenNotLoggedIn() throws Exception {
         
         // Perform action
@@ -369,13 +358,12 @@ public class CartControllerTests extends BaseControllerTests {
     }
     
     /**
-     * Test delete unexisting product from wishlist throw 404 error.
+     * Test delete non-existing product from wishlist throw 404 error.
      *
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(11)
-    public void deleteUnexistingProductFromCartShouldThrow404() throws Exception {
+    public void deleteNonExistingProductFromCartShouldThrow404() throws Exception {
         // Get user
         CreateUserDto user = this.data.getUsers().get(1);
         // Get token
@@ -398,7 +386,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(12)
     public void deleteProductNotInCartDoNothing() throws Exception {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
@@ -443,7 +430,6 @@ public class CartControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    @Order(13)
     public void deleteProductInCartSucceed() throws Exception {
         // Create empty session
         MockHttpSession session = new MockHttpSession();

@@ -3,21 +3,20 @@ package fr.alten.test_back.integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.TestContainersConfiguration;
 import fr.alten.test_back.TestData;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.dto.user.LoginUserDto;
 import fr.alten.test_back.helper.AppRoutes;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -29,9 +28,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * @author amarechal
  */
 @SpringBootTest
-@Import(TestContainersConfiguration.class)
 @AutoConfigureMockMvc
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Transactional
+@Rollback
+@ActiveProfiles("test")
 public class BaseControllerTests {
 
     /**
