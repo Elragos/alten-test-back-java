@@ -92,6 +92,9 @@ public class Product {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @Version
+    private Integer version;
+
     /**
      * Default constructor, mandatory for JPA.
      */
