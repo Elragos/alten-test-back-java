@@ -36,14 +36,29 @@ cp compose_example.yaml compose.yaml
 
 ## Lancement de l'installation
 
-Lancer gradlew pour démarrer l'application
+Tout d'abord, il faut initialiser la BDD afin d'avoir toutes les informations nécessaires :
 ```
-gradlew --configure-on-demand -x check bootRun
+gradlew initDb
 ```
-
-La BDD MySQL devrait s'initialiser toute seul au premier lancement avec :
+Cela va créer :
 * Les rôles USER et ADMIN dans role
 * Les utilisateurs et produits définis dans la ressource [initialData.json](https://github.com/Elragos/alten-test-back-java/blob/main/src/main/resources/initialData.json)
+
+Ensuite, on peut  démarrer l'application
+```
+gradlew bootRun
+```
+
+## Tester l'application
+
+Une série de tests d'intégration a été défini afin de s'assurer du bon comportement de l'application.
+Pour lancer ces tests, il suffit de lancer la commande suivante :
+```
+gradlew test
+```
+
+Avant de lancer les tests, un conteneur MySQL spécifique va être créé et initialisé
+avec les données de [testData.json](https://github.com/Elragos/alten-test-back-java/blob/main/src/test/resources/testData.json)
 
 ## Exploiter l'API
 
