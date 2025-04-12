@@ -83,7 +83,7 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{code}")
-    public ResponseEntity<Product> updateProduct(
+    public ResponseEntity<ProductDto> updateProduct(
             @PathVariable
             String code,
             @RequestBody
@@ -92,7 +92,7 @@ public class ProductController {
         // Update product
         Product updated = this.service.update(code, newProductData);
         // Return updated product
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(ProductDto.generate(updated));
     }
 
     /**
@@ -103,9 +103,9 @@ public class ProductController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{code}")
-    public ResponseEntity<Product> removeProduct(@PathVariable String code) {
+    public ResponseEntity<ProductDto> removeProduct(@PathVariable String code) {
         Product deleted = this.service.delete(code);
         // Return deleted product
-        return ResponseEntity.ok(deleted);
+        return ResponseEntity.ok(ProductDto.generate(deleted));
     }
 }
