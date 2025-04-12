@@ -46,7 +46,7 @@ public class CartControllerTests extends BaseControllerTests {
     @Test
     public void getCartIsEmptyWhenSessionInitialized() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         // Perform action
@@ -87,11 +87,11 @@ public class CartControllerTests extends BaseControllerTests {
     @Test
     public void addProductToCartShouldSucceed() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in cart
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set desired quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
@@ -122,7 +122,7 @@ public class CartControllerTests extends BaseControllerTests {
     @Test
     public void addNonExistingProductToCartShouldThrow404() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         
@@ -151,11 +151,11 @@ public class CartControllerTests extends BaseControllerTests {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set adding quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
@@ -191,11 +191,11 @@ public class CartControllerTests extends BaseControllerTests {
     @Test
     public void addMoreThanProductStockLimitsItToStock() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set adding quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), dto.quantity() + 1);
         
@@ -228,11 +228,11 @@ public class CartControllerTests extends BaseControllerTests {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set adding quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), dto.quantity() + 1);
 
@@ -285,11 +285,11 @@ public class CartControllerTests extends BaseControllerTests {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set adding quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         
@@ -365,7 +365,7 @@ public class CartControllerTests extends BaseControllerTests {
     @Test
     public void deleteNonExistingProductFromCartShouldThrow404() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
 
@@ -390,11 +390,11 @@ public class CartControllerTests extends BaseControllerTests {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product initially in cart
-        ProductDto initialDto = this.data.getProducts().getFirst();
+        ProductDto initialDto = this.testData.getProducts().getFirst();
         // Set initial quantity
         AddProductToCartDto payload = new AddProductToCartDto(initialDto.code(), 1);
         
@@ -408,7 +408,7 @@ public class CartControllerTests extends BaseControllerTests {
         );
         
         // Get product we try to remove
-        ProductDto testedDto = this.data.getProducts().get(2);
+        ProductDto testedDto = this.testData.getProducts().get(2);
 
         // Perform action
         this.mockMvc.perform(delete(AppRoutes.CART + "/" + testedDto.code())
@@ -434,11 +434,11 @@ public class CartControllerTests extends BaseControllerTests {
         // Create empty session
         MockHttpSession session = new MockHttpSession();
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Set adding quantity
         AddProductToCartDto payload = new AddProductToCartDto(dto.code(), 1);
         

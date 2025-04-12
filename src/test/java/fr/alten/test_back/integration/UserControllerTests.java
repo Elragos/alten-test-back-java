@@ -31,7 +31,7 @@ public class UserControllerTests extends BaseControllerTests {
     @Test
     public void adminLoginShouldSucceed() throws Exception {
         // Get admin user
-        CreateUserDto admin = this.data.getUsers().getFirst();
+        CreateUserDto admin = this.testData.getUsers().getFirst();
         // Set POST data
         LoginUserDto loginData = new LoginUserDto(admin.email(), admin.password());
         // Perform action
@@ -57,7 +57,7 @@ public class UserControllerTests extends BaseControllerTests {
     @Test
     public void adminLoggingAsAdmin() throws Exception {
         // Get admin user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get user info
@@ -85,7 +85,7 @@ public class UserControllerTests extends BaseControllerTests {
     @Test
     public void userLoggingAsUser() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
       
         // Get token
         String token = this.getJwtToken(user);
@@ -171,7 +171,7 @@ public class UserControllerTests extends BaseControllerTests {
      */
     @Test
     public void cannotReuseSameEmail() throws Exception {        
-        CreateUserDto dto = this.data.getUsers().getFirst();
+        CreateUserDto dto = this.testData.getUsers().getFirst();
         
         this.mockMvc.perform(
             post(AppRoutes.CREATE_ACCOUNT).contentType(MediaType.APPLICATION_JSON)

@@ -25,7 +25,7 @@ public class Wishlist {
      */
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "wishlist_product",
+        name = "wishlist_products",
         joinColumns = @JoinColumn(name = "wishlist_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )

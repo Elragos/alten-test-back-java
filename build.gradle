@@ -20,6 +20,32 @@ jacoco {
     toolVersion = "0.8.12"
 }
 
+// Create task to initialize database
+tasks.register('initDb', JavaExec) {
+    group = 'database'
+    description = 'Initialize database via Spring'
+
+    // Use main sources and dependencies
+    classpath = sourceSets.main.runtimeClasspath
+    // Specify class applicaiton launcher
+    mainClass = 'fr.alten.test_back.TestBackApplication'
+
+    // Define used JSON data path
+    def dataPath = project.hasProperty("jsonDataPath")
+            ? project.getProperty("jsonDataPath")
+            // Use test path if we are in test run, otherwise use default path
+            : "classpath:initialData.json"
+
+    args = [
+            // Set specific profile
+            "--spring.profiles.active=init-db",
+            // Disable web server
+            "--spring.main.web-application-type=none",
+            // Specify JSON data file to user
+            "--jsonData.path=${dataPath}"
+    ]
+}
+
 tasks.test {
     // Generate test report after all tests
     finalizedBy jacocoTestReport
@@ -39,7 +65,7 @@ repositories {
 }
 
 dependencies {
-    // JWT token libaries
+    // JWT token libraries
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
@@ -59,15 +85,19 @@ dependencies {
 
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 
+    // Database drivers
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
+    // Use
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
+    // Spring test libraries with junit
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

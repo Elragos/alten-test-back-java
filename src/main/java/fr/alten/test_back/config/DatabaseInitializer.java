@@ -12,12 +12,18 @@ import fr.alten.test_back.helper.JsonDataParser;
 import fr.alten.test_back.repository.ProductRepository;
 import fr.alten.test_back.repository.RoleRepository;
 import fr.alten.test_back.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,17 +33,15 @@ import java.util.Optional;
  *
  * @author amarechal
  */
-@Configuration
-@PropertySource(
-    value = "classpath:initialData.json",
-    factory = JsonPropertySourceFactory.class
-)
-public class InitialDataConfiguration {
+@Component
+@Profile({"init-db", "test"})
+public class DatabaseInitializer implements ApplicationRunner {
 
     /**
-     * Used environment.
+     * JSON data file path command parameter.
      */
-    private final Environment env;
+    @Value("${jsonData.path:classpath:initialData.json}")
+    private String jsonDataPath;
 
     /**
      * Used user repository.
@@ -59,28 +63,33 @@ public class InitialDataConfiguration {
      */
     private final ProductRepository productRepository;
 
-    public InitialDataConfiguration(
-            Environment env,
+    /**
+     * Used application context.
+     */
+    private final ConfigurableApplicationContext context;
+
+    public DatabaseInitializer(
             ProductRepository productRepository,
             UserRepository userRepository,
             RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            ConfigurableApplicationContext context
     ){
 
-        this.env = env;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.context = context;
     }
 
     /**
-     * Generate initial data after application contruction.
+     * Run database initialization.
      *
      * @throws JsonProcessingException When JSON is malformed.
      */
-    @PostConstruct
-    public void postConstruct() throws JsonProcessingException {
+    @Override
+    public void run(ApplicationArguments args) throws JsonProcessingException {
 
         // For all roles available
         for (RoleEnum role : RoleEnum.values()) {
@@ -88,10 +97,20 @@ public class InitialDataConfiguration {
             this.generateRole(role);
         }
         // Load initial data
-        loadInitialData();
+        this.loadInitialData();
 
         // Create admin account
-        createAdminAccount();
+        this.createAdminAccount();
+
+        // Get active profile
+        String[] activeProfiles = context.getEnvironment().getActiveProfiles();
+        // Determine if active profiles are standalone runs
+        boolean isStandaloneRun = List.of(activeProfiles).contains("init-db");
+        // If so
+        if (isStandaloneRun) {
+            // Shutdown application
+            context.close();
+        }
     }
 
     /**
@@ -115,11 +134,18 @@ public class InitialDataConfiguration {
      * @throws JsonProcessingException When JSON is malformed.
      */
     private void loadInitialData() throws JsonProcessingException {
-        // Load JSON data
+        // Load JSON data content
+        String jsonContent;
+        try (InputStream input = ResourceUtils.getURL(this.jsonDataPath).openStream()) {
+            jsonContent = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Impossible de lire le fichier d'initialisation : " + this.jsonDataPath, e);
+        }
+
+        // Parse data content
         JsonDataParser parser = new JsonDataParser(
             new ObjectMapper(),
-            this.env.getProperty("users", Object.class),
-            this.env.getProperty("products", Object.class)
+            jsonContent
         );
      
         // For all users in initial data
@@ -192,5 +218,4 @@ public class InitialDataConfiguration {
             this.productRepository.save(toCreate);
         }
     }
-
 }

@@ -54,6 +54,19 @@
             "shellId": 10,
             "inventoryStatus": "INSTOCK",
             "rating": 4.5
+        },
+        {
+            "code": "Test code 4",
+            "name": "Test INSTOCK 2",
+            "description": "Test description",
+            "image": "Test image",
+            "category": "Test Category",
+            "price": 9.99,
+            "quantity": 10,
+            "internalReference": "Test Internal",
+            "shellId": 10,
+            "inventoryStatus": "INSTOCK",
+            "rating": 4.5
         }
     ]
 }

@@ -8,9 +8,23 @@
             "role": "ROLE_ADMIN"
         },
         {
+            "email": "admin2@admin.com",
+            "username": "admin2",
+            "firstname":"admin2",
+            "password": "123456",
+            "role": "ROLE_ADMIN"
+        },
+        {
             "email": "test@test.com",
             "username": "Test",
             "firstname":"test",
+            "password": "123456",
+            "role": "ROLE_USER"
+        },
+        {
+            "email": "test2@test.com",
+            "username": "Test2",
+            "firstname":"test2",
             "password": "123456",
             "role": "ROLE_USER"
         }

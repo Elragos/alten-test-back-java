@@ -3,21 +3,27 @@ package fr.alten.test_back.integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.alten.test_back.TestData;
+import fr.alten.test_back.config.TestcontainersConfig;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.dto.user.LoginUserDto;
 import fr.alten.test_back.helper.AppRoutes;
+import fr.alten.test_back.helper.JsonDataParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Transactional
 @Rollback
 @ActiveProfiles("test")
+@Import(TestcontainersConfig.class)
 public class BaseControllerTests {
 
     /**
@@ -49,8 +56,7 @@ public class BaseControllerTests {
     /**
      * Used test data.
      */
-    @Autowired
-    protected TestData data;
+    protected JsonDataParser testData;
 
     /**
      * Load test data before each test.
@@ -59,8 +65,21 @@ public class BaseControllerTests {
      */
     @BeforeEach
     public void setUp() throws JsonProcessingException {
-        // Load JSON data
-        this.data.loadData();
+        if (this.testData == null){
+            // Load JSON data content
+            String jsonContent;
+            try (InputStream input = ResourceUtils.getURL("classpath:testData.json").openStream()) {
+                jsonContent = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException("Impossible de lire le fichier de test testData.json", e);
+            }
+
+            // Parse data content
+            this.testData = new JsonDataParser(
+                    new ObjectMapper(),
+                    jsonContent
+            );
+        }
     }
 
     /**

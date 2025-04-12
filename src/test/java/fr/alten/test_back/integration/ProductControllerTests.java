@@ -45,9 +45,9 @@ public class ProductControllerTests extends BaseControllerTests {
      * @throws Exception If test went wrong.
      */
     @Test
-    public void getAllProductsShouldSucceedWith3Products() throws Exception {
+    public void getAllProductsShouldSucceedWithAllTestProducts() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
 
@@ -60,13 +60,11 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is OK
             .andExpect(status().isOk())
             // Test list has 3 items
-            .andExpect(jsonPath("$.length()", is(3)))
+            .andExpect(jsonPath("$.length()", is(4)))
             // Test list contains all desired codes
-            /*
-            .andExpect(jsonPath("$..code",
-                containsInAnyOrder(this.data.getProducts().stream().map(ProductDto::code).toList())
-            ))
-            */
+            .andExpect(jsonPath("$[*].code",containsInAnyOrder(
+                this.testData.getProducts().stream().map(ProductDto::code).toArray(String[]::new)
+            )))
             ;
     }
 
@@ -92,12 +90,12 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void getSpecificProductShouldSucceed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
 
         // Get test product code
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
 
         // Get product details
         this.mockMvc.perform(get(AppRoutes.PRODUCT + "/" + dto.code())
@@ -120,7 +118,7 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void getNonExsitingProductShouldThrow404() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
 
@@ -156,10 +154,10 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void createProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
-        ProductDto productData = this.data.getProducts().getFirst();
+        ProductDto productData = this.testData.getProducts().getFirst();
 
         // Get product details
         this.mockMvc.perform(post(AppRoutes.PRODUCT)
@@ -181,11 +179,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void createProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get existing product
-        ProductDto productData = this.data.getProducts().getFirst();
+        ProductDto productData = this.testData.getProducts().getFirst();
         Product product = new Product(productData);
         product.setCode("Test creation");
         productData = ProductDto.generate(product);
@@ -229,11 +227,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void createExistingProductShouldFailed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get existing product
-        ProductDto productData = this.data.getProducts().getFirst();
+        ProductDto productData = this.testData.getProducts().getFirst();
 
         // Try creating product
         this.mockMvc.perform(post(AppRoutes.PRODUCT)
@@ -270,10 +268,10 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
-        ProductDto productData = this.data.getProducts().getFirst();
+        ProductDto productData = this.testData.getProducts().getFirst();
 
         // Try updating product
         this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + productData.code())
@@ -295,11 +293,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductShouldSucceedWhenAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         Product product = new Product(dto);
         // Update only description
         product.setDescription("Description updated");
@@ -330,11 +328,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductCodeShouldSucceedIfNotUsed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         Product product = new Product(dto);
         // Update only code
         product.setCode("Code updated");
@@ -364,11 +362,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductCodeShouldSucceedIfSameProduct() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
 
         // Update product details
         this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/" + dto.code())
@@ -394,12 +392,12 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductCodeShouldFailedIfAlreadyUsed() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get products from DB
-        ProductDto updatedDto = this.data.getProducts().getFirst();
-        ProductDto collidingDto = this.data.getProducts().get(1);
+        ProductDto updatedDto = this.testData.getProducts().getFirst();
+        ProductDto collidingDto = this.testData.getProducts().get(1);
         // Update only code
         Product updatedProduct = new Product(updatedDto);
         updatedProduct.setCode(collidingDto.code());
@@ -426,11 +424,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void updateProductShouldFailedIfNotExists() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product
-        ProductDto updatedDto = this.data.getProducts().getFirst();
+        ProductDto updatedDto = this.testData.getProducts().getFirst();
 
         // Update product details
         this.mockMvc.perform(patch(AppRoutes.PRODUCT + "/0")
@@ -467,7 +465,7 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductShouldFailedWhenNotAdmin() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
 
@@ -489,7 +487,7 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductShouldFailedIfNotExists() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
 
@@ -512,11 +510,11 @@ public class ProductControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductShouldSucceedIfAdmin() throws Exception {
         // Get admin
-        CreateUserDto user = this.data.getUsers().getFirst();
+        CreateUserDto user = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(user);
         // Get product from DB
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         // Delete product
         this.mockMvc.perform(delete(AppRoutes.PRODUCT + "/" + dto.code())
             .header("Authorization", "Bearer " + token)

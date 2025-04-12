@@ -1,0 +1,11 @@
+
+jsonData:
+  path: "classpath:testData.json"
+
+spring:
+  # Disable SQL logs
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+    show-sql: false

@@ -44,7 +44,7 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void getReturnedWishlistIsEmptyWhenNotCreatedYet() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         // Perform action
@@ -85,11 +85,11 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void addProductToWishlistShouldSucceed() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         
         // Perform action
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
@@ -128,7 +128,7 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void addNonExistingProductToWishlistShouldThrow404() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         // Perform action
@@ -150,11 +150,11 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void addProductAlreadyInWishlistDoNothing() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         
         // Perform action twice
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
@@ -197,7 +197,7 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void deleteNonExistingProductFromWishlistShouldThrow404() throws Exception {
         // Get user
-        CreateUserDto user = this.data.getUsers().get(1);
+        CreateUserDto user = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(user);
         // Perform action
@@ -219,12 +219,12 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductNotInWishlistDoNothing() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get products
-        ProductDto addedDto = this.data.getProducts().getFirst();
-        ProductDto deletedDto = this.data.getProducts().getLast();
+        ProductDto addedDto = this.testData.getProducts().getFirst();
+        ProductDto deletedDto = this.testData.getProducts().getLast();
 
         // Add first product to wishlist
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + addedDto.code())
@@ -265,11 +265,11 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductInWishlistSucceed() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().get(1);
+        CreateUserDto userDto = this.testData.getUsers().get(1);
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to remove from wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
 
         // Add product to wishlist
         this.mockMvc.perform(post(AppRoutes.WISHLIST + "/" + dto.code())
@@ -296,11 +296,11 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductWhenNoWishlistDoNothing() throws Exception {
         // Get user
-        CreateUserDto userDto = this.data.getUsers().getFirst();
+        CreateUserDto userDto = this.testData.getUsers().getFirst();
         // Get token
         String token = this.getJwtToken(userDto);
         // Get product to add in wishlist
-        ProductDto dto = this.data.getProducts().getFirst();
+        ProductDto dto = this.testData.getProducts().getFirst();
         
         // Perform action
         this.mockMvc.perform(delete(AppRoutes.WISHLIST + "/" + dto.code())
@@ -322,10 +322,10 @@ public class WishlistControllerTests extends BaseControllerTests {
     @Test
     public void deleteProductRemovesItFromAllWishlists() throws Exception {
         // Get users
-        CreateUserDto adminDto = this.data.getUsers().getFirst();
-        CreateUserDto userDto = this.data.getUsers().getLast();
+        CreateUserDto adminDto = this.testData.getUsers().getFirst();
+        CreateUserDto userDto = this.testData.getUsers().getLast();
         // Get test product
-        ProductDto productDto = this.data.getProducts().getFirst();
+        ProductDto productDto = this.testData.getProducts().getFirst();
 
         // Get JWT tokens
         String adminToken = this.getJwtToken(adminDto);
