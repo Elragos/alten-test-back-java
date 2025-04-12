@@ -1,0 +1,28 @@
+# French version of messages
+
+error:
+  # Authentication error messages
+  auth:
+    accessDenied:
+      title: 'Accès refusé'
+      message: 'Vous n''avez pas accès à cette ressource'
+    emailAlreadyExists: 'L''email "{0}" est déjà utilisé.'
+    failed: 'Email ou mot de passe invalide.'
+    unauthorized: 'Accès non autorisé.'
+    userNotFound: 'Utilisateur "{0}" inexistant.'
+
+  # Cart error messages
+  cart:
+    invalidQuantity: 'Quantité demandée invalide'
+    notEnoughStock: 'Le produit "{0}" a été limité à {1} items du fait d''une limitation de stock.'
+    productRemoved: 'Le produit "{0}" a été retiré du panier car sa quantité était inférieure ou égale à 0.'
+
+  # Generic error messages
+  generic:
+    invalidParameter: 'Paramètre invalide'
+    notFound: 'Non trouvé'
+
+  # Product error messages
+  product:
+    codeNotFound: 'Le code produit "{0}" n''existe pas.'
+    codeAlreadyUsed: 'Le code produit "{0}" est déjà utilisé par un autre produit.'

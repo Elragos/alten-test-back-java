@@ -1,0 +1,28 @@
+# English version of messages, default locale
+
+error:
+  # Authentication error messages
+  auth:
+    accessDenied:
+      title: 'Access denied'
+      message: 'You are not allowed to access this ressource.'
+    emailAlreadyExists: 'Email "{0}" already used.'
+    failed: 'Invalid Email or password.'
+    unauthorized: 'Unauthorized access.'
+    userNotFound: 'User "{0}" not found.'
+
+  # Cart error messages
+  cart:
+    invalidQuantity: 'Invalid quantity sent.'
+    notEnoughStock: 'Product "{0}" was limited to {1} items because of stock limitation'
+    productRemoved: 'Product "{0}" was removed from cart since quantity was equals to or below 0.'
+
+  # Generic error messages
+  generic:
+    invalidParameter: 'Invalid parameter'
+    notFound: 'Not found'
+
+  # Product error messages
+  product:
+    codeNotFound: 'Product code "{0}" not found.'
+    codeAlreadyUsed: 'Product code "{0}" is already used by another product.'

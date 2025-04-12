@@ -1,8 +1,8 @@
 package fr.alten.test_back.helper;
 
+import fr.alten.test_back.config.translation.YamlMessageSource;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
@@ -18,19 +18,19 @@ public class Translator {
     /**
      * Used message source for translator.
      */
-    private static ResourceBundleMessageSource messageSource;
+    private static YamlMessageSource messageSource;
 
     /**
      * Injected message source from Spring
      */
-    private final ResourceBundleMessageSource injectMessageSource;
+    private final YamlMessageSource injectMessageSource;
 
     /**
      * Create translator.
-     * @param resourceBundleMessageSource Used message source.
+     * @param messageSource Used message source.
      */
-    public Translator(ResourceBundleMessageSource resourceBundleMessageSource) {
-        this.injectMessageSource = resourceBundleMessageSource;
+    public Translator(YamlMessageSource messageSource) {
+        this.injectMessageSource = messageSource;
     }
 
     /**
@@ -70,7 +70,7 @@ public class Translator {
      * @return Translated message.
      */
     public static String translate(String messageCode, Object[] params) {
-        return messageSource.getMessage(messageCode, params, LocaleContextHolder.getLocale());
+        return Translator.translate(messageCode, params, LocaleContextHolder.getLocale());
     }
 
     /**
