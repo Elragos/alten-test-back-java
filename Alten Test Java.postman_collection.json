@@ -22,12 +22,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/product",
+							"raw": "{{baseURL}}/products",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"product"
+								"products"
 							]
 						}
 					},
@@ -59,19 +59,19 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseURL}}/product",
+							"raw": "{{baseURL}}/products",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"product"
+								"products"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get product 1",
+					"name": "Get specific product",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -82,20 +82,20 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/product/1",
+							"raw": "{{baseURL}}/products/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"product",
-								"1"
+								"products",
+								"Test code"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Update product 1",
+					"name": "Update specific product",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -120,20 +120,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseURL}}/product/15",
+							"raw": "{{baseURL}}/products/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"product",
-								"15"
+								"products",
+								"Test code"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Delete product 1",
+					"name": "Delete specific product",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -144,13 +144,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/product/1",
+							"raw": "{{baseURL}}/products/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"product",
-								"1"
+								"products",
+								"Test code"
 							]
 						}
 					},
@@ -419,13 +419,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/wishlist/3",
+							"raw": "{{baseURL}}/wishlist/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"wishlist",
-								"3"
+								"Test code"
 							]
 						}
 					},
@@ -443,13 +443,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/wishlist/4",
+							"raw": "{{baseURL}}/wishlist/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"wishlist",
-								"4"
+								"Test code"
 							]
 						}
 					},
@@ -519,7 +519,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"quantity\" : 50\r\n}",
+							"raw": "{\r\n    \"productCode\": \"Test code\",\r\n    \"quantity\" : 50\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -527,13 +527,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseURL}}/cart/1",
+							"raw": "{{baseURL}}/cart",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
-								"cart",
-								"1"
+								"cart"
 							]
 						}
 					},
@@ -551,13 +550,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseURL}}/cart/1",
+							"raw": "{{baseURL}}/cart/Test code",
 							"host": [
 								"{{baseURL}}"
 							],
 							"path": [
 								"cart",
-								"1"
+								"Test code"
 							]
 						}
 					},
