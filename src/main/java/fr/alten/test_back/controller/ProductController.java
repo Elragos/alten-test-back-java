@@ -69,9 +69,9 @@ public class ProductController {
         // Create product
         Product created = this.service.create(newProductData);
         // Return created product URL
-        return ResponseEntity.created(
-                URI.create(AppRoutes.PRODUCT + "/" + URLEncoder.encode(created.getCode(), StandardCharsets.UTF_8))
-        ).build();
+        return ResponseEntity.created(URI.create(AppRoutes.PRODUCT + "/"
+            + URLEncoder.encode(created.getCode(), StandardCharsets.UTF_8).replace("+", "%20")
+        )).build();
     }
 
     /**

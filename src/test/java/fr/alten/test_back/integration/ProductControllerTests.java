@@ -199,7 +199,7 @@ public class ProductControllerTests extends BaseControllerTests {
             // Test HTTP response is Created
             .andExpect(status().isCreated())
             // Test that we are redirected to product details URL
-            .andExpect(redirectedUrlPattern(AppRoutes.PRODUCT + "/{code:[A-Za-z+]+}"))
+            .andExpect(redirectedUrlPattern(AppRoutes.PRODUCT + "/{code:[A-Za-z0-9%]+}"))
             // Get response
             .andReturn()
             ;
