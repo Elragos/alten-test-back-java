@@ -3,9 +3,9 @@ package fr.alten.test_back.config;
 import fr.alten.test_back.config.translation.MessageProperties;
 import fr.alten.test_back.config.translation.YamlMessageSource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.MessageSource;
 
 /**
  * Application configuration.

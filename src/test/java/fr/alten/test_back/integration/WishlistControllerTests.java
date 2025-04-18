@@ -3,7 +3,6 @@ package fr.alten.test_back.integration;
 import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
 import fr.alten.test_back.helper.AppRoutes;
-
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.is;

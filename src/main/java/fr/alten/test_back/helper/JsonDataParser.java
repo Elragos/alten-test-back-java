@@ -1,6 +1,5 @@
 package fr.alten.test_back.helper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
