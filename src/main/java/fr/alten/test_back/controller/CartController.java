@@ -1,13 +1,14 @@
 package fr.alten.test_back.controller;
 
 import fr.alten.test_back.dto.cart.AddProductToCartDto;
-import fr.alten.test_back.entity.Product;
 import fr.alten.test_back.helper.AppRoutes;
 import fr.alten.test_back.helper.Cart;
-import fr.alten.test_back.service.ProductService;
+import fr.alten.test_back.service.CartService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -20,15 +21,20 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     /**
-     * Used product service.
+     * Used cart service.
      */
-    private final ProductService service;
+    private final CartService service;
+
+    /**
+     * Cart items session attribute.
+     */
+    private final String SESSION_ATTRIBUTE = "CART_ITEMS";
 
     /**
      * Initialize service.
-     * @param service Used product service
+     * @param service Used cart service
      */
-    public CartController(ProductService service) {
+    public CartController(CartService service) {
         this.service = service;
     }
 
@@ -40,7 +46,12 @@ public class CartController {
      */
     @GetMapping
     public ResponseEntity<Cart> getCart(HttpSession session) {
-        return ResponseEntity.ok(Cart.getSessionCart(session));
+        // Get cart from session
+        Cart cart = this.getSessionCart(session);
+        // Refresh cart
+        this.service.refresh(cart);
+        // Return cart
+        return ResponseEntity.ok(cart);
     }
 
     /**
@@ -55,10 +66,9 @@ public class CartController {
             HttpSession session,
             @RequestBody AddProductToCartDto payload
     ) {
-        Cart cart = Cart.getSessionCart(session);
-        Product toAdd = this.service.getByCode(payload.productCode());
-        cart.addItem(payload.quantity(), toAdd);
-        cart.saveInSession(session);
+        Cart cart = this.getSessionCart(session);
+        this.service.addItem(cart, payload.quantity(), payload.productCode());
+        this.saveCart(session, cart);
         return ResponseEntity.ok(cart);
     }
 
@@ -73,10 +83,36 @@ public class CartController {
             HttpSession session,
             @PathVariable String code
     ) {
-        Cart cart = Cart.getSessionCart(session);
-        Product toRemove = this.service.getByCode(code);
-        cart.removeItem(toRemove);
-        cart.saveInSession(session);
+        Cart cart = this.getSessionCart(session);
+        this.service.removeItem(cart, code);
+        this.saveCart(session, cart);
         return ResponseEntity.ok(cart);
     }
+
+    /**
+     * Get user cart from session.
+     * @param session User session.
+     * @return User cart
+     */
+    private Cart getSessionCart(HttpSession session) {
+        // Get cart items from session
+        List<Cart.CartItem> items = (List<Cart.CartItem>) session.getAttribute(SESSION_ATTRIBUTE);
+        // If session has no items
+        if (items == null){
+            // Return empty cart
+            return new Cart();
+        }
+        // Else return cart with found items.
+        return new Cart(items);
+    }
+
+    /**
+     * Save cart in session.
+     * @param session User session.
+     * @param cart User cart.
+     */
+    private void saveCart(HttpSession session, Cart cart) {
+        session.setAttribute(SESSION_ATTRIBUTE, cart.getItems());
+    }
+
 }
