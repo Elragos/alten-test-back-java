@@ -3,14 +3,13 @@ package fr.alten.test_back.service;
 import fr.alten.test_back.helper.JwtToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,15 +105,15 @@ public class JwtService {
         Date expirationDate = new Date(System.currentTimeMillis() + expiration);
         String tokenValue = Jwts.builder()
                 // Set extra info
-                .setClaims(extraClaims)
+                .claims(extraClaims)
                 // Set user info
-                .setSubject(userDetails.getUsername())
+                .subject(userDetails.getUsername())
                 // Set token creation date
-                .setIssuedAt(now)
+                .issuedAt(now)
                 // Set token expiration time
-                .setExpiration(expirationDate)
+                .expiration(expirationDate)
                 // Set token signature key
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey())
                 // Generate token
                 .compact();
 
@@ -163,15 +162,15 @@ public class JwtService {
      */
     private Claims extractAllClaims(String token) {
         // Create JWT parser
-        return Jwts.parserBuilder()
+        return Jwts.parser()
                 // Set used signature key
-                .setSigningKey(this.getSignInKey())
+                .verifyWith(this.getSignInKey())
                 // Generate parser
                 .build()
                 // Parse token information
-                .parseClaimsJws(token)
+                .parseSignedClaims(token)
                 // Get token content
-                .getBody();
+                .getPayload();
     }
 
     /**
@@ -179,7 +178,7 @@ public class JwtService {
      *
      * @return Token signature key.
      */
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }

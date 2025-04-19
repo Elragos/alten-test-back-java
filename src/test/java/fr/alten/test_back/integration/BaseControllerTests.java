@@ -1,6 +1,5 @@
 package fr.alten.test_back.integration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.config.TestcontainersConfig;
@@ -61,10 +60,10 @@ public class BaseControllerTests {
     /**
      * Load test data before each test.
      *
-     * @throws JsonProcessingException If JSON is malformed.
+     * @throws RuntimeException If JSON is malformed.
      */
     @BeforeEach
-    public void setUp() throws JsonProcessingException {
+    public void setUp() throws RuntimeException {
         if (this.testData == null){
             // Load JSON data content
             String jsonContent;

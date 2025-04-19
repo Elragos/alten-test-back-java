@@ -19,7 +19,7 @@ public class TestcontainersConfig {
      * Mysql container.
      */
     @Container
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest")
+    final static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest")
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass");

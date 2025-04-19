@@ -1,6 +1,5 @@
 package fr.alten.test_back.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.alten.test_back.dto.product.ProductDto;
 import fr.alten.test_back.dto.user.CreateUserDto;
@@ -84,12 +83,13 @@ public class DatabaseInitializer implements ApplicationRunner {
     }
 
     /**
-     * Run database initialization.
+     * Run database initialization according to JSON data file.
      *
-     * @throws JsonProcessingException When JSON is malformed.
+     * @param args Command arguments.
+     * @throws RuntimeException When JSON is malformed.
      */
     @Override
-    public void run(ApplicationArguments args) throws JsonProcessingException {
+    public void run(ApplicationArguments args) throws RuntimeException {
 
         // For all roles available
         for (RoleEnum role : RoleEnum.values()) {
@@ -131,9 +131,9 @@ public class DatabaseInitializer implements ApplicationRunner {
     /**
      * Load initial data from JSON file
      * 
-     * @throws JsonProcessingException When JSON is malformed.
+     * @throws RuntimeException When JSON is malformed.
      */
-    private void loadInitialData() throws JsonProcessingException {
+    private void loadInitialData() throws RuntimeException {
         // Load JSON data content
         String jsonContent;
         try (InputStream input = ResourceUtils.getURL(this.jsonDataPath).openStream()) {

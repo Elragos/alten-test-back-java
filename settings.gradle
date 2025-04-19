@@ -1,1 +1,14 @@
+plugins {
+    // Adding refreshVersions to manage dependancies
+    id 'de.fayard.refreshVersions' version '0.60.5'
+}
+
+// Configure refreshVersions
+refreshVersions {
+    // Reject versions that are not stable
+    rejectVersionIf {
+        candidate.stabilityLevel != StabilityLevel.Stable
+    }
+}
+
 rootProject.name = 'test-back'
